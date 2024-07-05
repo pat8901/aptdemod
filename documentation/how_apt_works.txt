@@ -1,0 +1,32 @@
+Automatic Picture Transmission (APT):
+1. The satellites encode or modulate image data into a 2400 Hz signal
+2. transmitted to earth via a radio wave between 137 and 138 MHz
+
+3. Absolute Value, Cosine and 
+Hilbert/FFT are three methods for decoding or demodulating the WAV file into an image.
+
+4. The audio file contains three important frequencies: 2400 Hz, 1040 Hz and 832 Hz
+5. The three frequencies carry different information:
+    2400 Hz Pixel values (in grayscale) for channel A and B images
+    1040 Hz Channel A sync signal
+    832 Hz Channel B sync signal
+
+6. For NOAA, ‘words’ means units of information, or pixels. 
+This means that there are 909 pixels in each line of Channel A and Channel B respectively.
+
+7. One complete line of data equals 2080 pixels.
+8. o determine what the values of these pixels are, it is 
+necessary to downsample the audio file from its original sample rate. 
+
+9.  11025 samples per second, and downsamples this information to 4160 samples per second 
+(2080 pixels per line in 0.5 seconds × 2 = 4160 pixels per second).
+
+10. Hilbert FFT, this is the most processing-heavy, but most precise, way to decode an 
+audio recording of an APT signal into an image.
+
+11. 
+12. 
+13. 
+14. 
+15. 
+

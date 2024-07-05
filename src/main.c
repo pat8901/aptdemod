@@ -1,7 +1,8 @@
 #include <stdlib.h>
+#include <apt.h>
 
 int main()
 {
-    print("Hello world");
+
     return 0;
 }
