@@ -2,11 +2,22 @@
 // https://en.wikipedia.org/wiki/Automatic_picture_transmission
 #include <stdio.h>
 #include <time.h>
-#include <stdlib.h>
+
+#include <sndfile.h>
 #include "apt.h"
 
 int main(int argc, char *argv[])
 {
+    SF_INFO sfinfo;
+    SNDFILE *sndfile;
+
+    // Example: Open a file
+    sndfile = sf_open("example.wav", SFM_READ, &sfinfo);
+    if (!sndfile)
+    {
+        printf("Failed to open file: %s\n", sf_strerror(NULL));
+        return -1;
+    }
 
     fill_frame();
     return 0;

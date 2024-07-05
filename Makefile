@@ -1,21 +1,25 @@
+BUILD_DIR = build
 CC = gcc
 
-CFLAGS = -Wextra -Wall -g -I"E:\programs\c\satellite_communication_system\lib\libsndfile\include"
+CFLAGS = -Wextra -Wall -g -I"/usr/include" -I"./include"
 
-LDLIBS = -L"E:\programs\c\satellite_communication_system\lib\libsndfile\lib" -lm 
+LDLIBS = -L"/usr/lib/x86_64-linux-gnu/" -lsndfile
 
-SRCS = apt.c
+SRCS = src/apt.c
 
 OBJS = $(SRCS:.c=.o)
 
-EXE = my_program.exe
+EXE = $(BUILD_DIR)/my_program
 
 all: $(EXE)
 
 # Rule to build the target executable
-$(EXE): $(OBJ)
+$(EXE): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
 
 # Rule to build object files
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -rf $(BUILD_DIR)/*
