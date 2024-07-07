@@ -1,3 +1,7 @@
+Helpful Links:
+=====================
+https://en.wikipedia.org/wiki/8-bit_color
+
 Automatic Picture Transmission (APT):
 1. The satellites encode or modulate image data into a 2400 Hz signal
 2. transmitted to earth via a radio wave between 137 and 138 MHz
@@ -29,4 +33,42 @@ audio recording of an APT signal into an image.
 13. 
 14. 
 15. 
+
+The process:
+=========================
+satellite transmitting:
+1. instruments collect data
+2. data stored as 0 and 1 (digital data, what computers understand)
+3. digital data is AM modulated into a baseband signal (2400Hz, 1040Hz, 832Hz)
+4. baseband signal is FM modulated into a carrier signal (137MHz and 138MHz depending upon which NOAA satellite)
+5. Transmission is sent to ground station
+
+Ground station receiver (sdr):
+1. Ground station antenna (sdr) receives FM modulated carrier signal transmission
+2. radio receiver (sdr) demodulates FM carrier signal into AM modulated baseband signal
+
+Ground Station decoder (this program)
+3. Demodulate Analog AM baseband signal (2400Hz, 1040Hz, 832Hz) to reveal digital data
+4. make sure sample rate is 4160 (not sure what step this should occur)
+5. interpret digital data to reconstruct 8-bit image
+6. save image to a file
+
+(As I understand it currently)
+How to demodulate AM baseband 2400Hz signal:
+===============================================
+1. Remember there are 4160 samples per second. 2 lines per second.
+2. Each line is 2080 samples, each sample is a pixel (8-bits).
+3. To begin to demodulate the AM baseband 2400Hz signal we need to turn it into I/Q signals.
+4. It is unclear to me at what rate should I turn the baseband signal into I/Q signals.
+5. Do I pre-process the whole transmission into a I/Q signal, just 1 second, a line, or just per sample.
+6. Regardless we can transform into I/Q signals by either doing FIR (Finite Impulse Response filter) 
+   with a specific set of coefficients known as a Hilbert Transform, or Fast Fourier Transform (FFT).
+7. Once we have a I/Q signal the AM demodulation is the absolute value of each pair of points 
+   defined as: abs(I_i, Q_i) = sqrt( I_i * I_i + Q_i * Q_i) where I_i and Q_i are the ith samples of the I/Q time series.
+8. As of right now I think this may mean that once we take the abs we will get either 1 or 0, i.e., digital data.
+
+to do:
+=================
+1. get the current sample rate and print
+2. change the sample rate to 4160
 
