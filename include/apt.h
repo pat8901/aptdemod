@@ -29,4 +29,8 @@ void pack_telemetry(struct Line *line_ptr, char channel);
 void fill_frame();
 void print_frame();
 
+void get_path();
+void seek(SNDFILE *sndfile, SF_INFO *sfinfo);
+void print_buffer(float *buffer);
+
 #endif

@@ -1,8 +1,0 @@
-#ifndef Apt_H
-#define Apt_H
-struct Frame
-{
-    struct Frame[];
-};
-
-#endif

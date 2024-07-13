@@ -9,7 +9,7 @@ SRCS = src/apt.c
 
 OBJS = $(SRCS:.c=.o)
 
-EXE = $(BUILD_DIR)/my_program
+EXE = $(BUILD_DIR)/apt_decoder
 
 all: $(EXE)
 

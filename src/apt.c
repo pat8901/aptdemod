@@ -3,20 +3,73 @@
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
-
 #include <sndfile.h>
-#include "apt.h"
 #include <linux/limits.h>
+#include "apt.h"
 
 int main(int argc, char *argv[])
 {
     SF_INFO sfinfo;
-    printf("Format before open: %d\n", sfinfo.format);
-    sfinfo.format = 0;
-    printf("Format before open, after change: %d\n", sfinfo.format);
     SF_INFO *ptr = &sfinfo;
     SNDFILE *sndfile;
 
+    get_path();
+    sfinfo.format = 0;
+    const char *file_path = "./documentation/test_audio/20210720111842.wav";
+
+    // Opening audio file
+    sndfile = sf_open(file_path, SFM_READ, &sfinfo);
+    if (!sndfile)
+    {
+        printf("Failed to open file: %s\n", sf_strerror(NULL));
+        return -1;
+    }
+
+    printf("Frame amount: %ld\n", ptr->frames);
+    printf("Sample rate: %d Hz\n", ptr->samplerate);
+    printf("Format: %d\n", ptr->format);
+    printf("Channels: %d\n\n", sfinfo.channels);
+
+    seek(sndfile, ptr);
+
+    return 0;
+}
+
+// TODO correct the name of this function and determine a way to dynamically size buffer to insert appropriate number of samples
+//      to match the size of a byte. Ideally I would want a sample rate of 4160. This would give me a byte per sample.
+void seek(SNDFILE *sndfile, SF_INFO *sfinfo)
+{
+    // sf_count_t my_frame = sf_seek(sndfile, 1, SEEK_CUR);
+    // printf("Frame ID: %ld\n", my_frame);
+    // my_frame = sf_seek(sndfile, 1, SEEK_CUR);
+    // printf("Frame ID: %ld\n", my_frame);
+    // my_frame = sf_seek(sndfile, 1, SEEK_CUR);
+    // printf("Frame ID: %ld\n", my_frame);
+    // my_frame = sf_seek(sndfile, 1, SEEK_CUR);
+    // printf("Frame ID: %ld\n", my_frame);
+    // my_frame = sf_seek(sndfile, -2, SEEK_END);
+    // printf("Frame ID: %ld\n", my_frame);
+
+    sf_count_t frames = sfinfo->frames;
+    sf_count_t seek_rate = 1;
+    int sample_rate = sfinfo->samplerate;
+    float buffer[1];
+    float *buffer_ptr = &buffer;
+
+    for (int i = 0; i < 256; i += seek_rate)
+    {
+        // sf_count_t current_frame = sf_seek(sndfile, seek_rate, SEEK_CUR);
+        sf_count_t frame_data = sf_read_float(sndfile, buffer, 1);
+        printf("Frame ID: %ld Data: %f\n", i, buffer[0]);
+    }
+}
+
+void print_buffer(float *buffer)
+{
+}
+
+void get_path()
+{
     char cwd[PATH_MAX];
     if (getcwd(cwd, sizeof(cwd)) != NULL)
     {
@@ -26,144 +79,4 @@ int main(int argc, char *argv[])
     {
         perror("getcwd() error");
     }
-
-    const char *file_path = "./documentation/APT_IQ/APT_IQ.wav";
-
-    // Example: Open a file
-    sndfile = sf_open(file_path, SFM_READ, &sfinfo);
-    if (!sndfile)
-    {
-        printf("Failed to open file: %s\n", sf_strerror(NULL));
-        return -1;
-    }
-    else
-    {
-        printf("Opened the file successfully!\n");
-        printf("Frame amount: %ld\n", ptr->frames);
-        printf("Sample rate: %d Hz\n", ptr->samplerate);
-        printf("Format: %d\n", ptr->format);
-        printf("Channels: %d\n", sfinfo.channels);
-    }
-    return 0;
 }
-
-// void pack_sync(struct Line *line_ptr, char channel)
-// {
-//     srand(time(NULL));
-
-//     if (channel == 'A')
-//     {
-//         for (int i = 0; i < sizeof(line_ptr->channel_A_sync) / sizeof(line_ptr->channel_A_sync[0]); i++)
-//         {
-//             int number = rand() % 256;
-//             printf("%d\n", number);
-//             line_ptr->channel_A_sync[i] = number;
-//         }
-//     }
-//     else
-//     {
-//         for (int i = 0; i < sizeof(line_ptr->channel_B_sync) / sizeof(line_ptr->channel_B_sync[0]); i++)
-//         {
-//             int number = rand() % 256;
-//             line_ptr->channel_B_sync[i] = number;
-//         }
-//     }
-// }
-// void pack_space(struct Line *line_ptr, char channel)
-// {
-//     srand(time(NULL));
-//     if ((int)channel == 'A')
-//     {
-//         for (int i = 0; i < sizeof(line_ptr->channel_A_space) / sizeof(line_ptr->channel_A_space[0]); i++)
-//         {
-//             int number = rand() % 256;
-//             printf("%d\n", number);
-//             line_ptr->channel_A_space[i] = number;
-//         }
-//     }
-//     else
-//     {
-//         for (int i = 0; i < sizeof(line_ptr->channel_B_space) / sizeof(line_ptr->channel_B_space[0]); i++)
-//         {
-//             int number = rand() % 256;
-//             printf("%d\n", number);
-//             line_ptr->channel_B_space[i] = number;
-//         }
-//     }
-// }
-// void pack_image(struct Line *line_ptr, char channel)
-// {
-//     srand(time(NULL));
-//     if ((int)channel == 'A')
-//     {
-//         for (int i = 0; i < sizeof(line_ptr->channel_B_image) / sizeof(line_ptr->channel_A_image[0]); i++)
-//         {
-//             int number = rand() % 256;
-//             printf("%d\n", number);
-//             line_ptr->channel_A_image[i] = number;
-//         }
-//     }
-//     else
-//     {
-//         for (int i = 0; i < sizeof(line_ptr->channel_B_image) / sizeof(line_ptr->channel_B_image[0]); i++)
-//         {
-//             int number = rand() % 256;
-//             printf("%d\n", number);
-//             line_ptr->channel_B_image[i] = number;
-//         }
-//     }
-// }
-// void pack_telemetry(struct Line *line_ptr, char channel)
-// {
-//     srand(time(NULL));
-//     if ((int)channel == 'A')
-//     {
-//         for (int i = 0; i < sizeof(line_ptr->channel_A_telemetry) / sizeof(line_ptr->channel_A_telemetry[0]); i++)
-//         {
-//             int number = rand() % 256;
-//             printf("%d\n", number);
-//             line_ptr->channel_A_telemetry[i] = number;
-//         }
-//     }
-//     else
-//     {
-//         for (int i = 0; i < sizeof(line_ptr->channel_B_telemetry) / sizeof(line_ptr->channel_B_telemetry[0]); i++)
-//         {
-//             int number = rand() % 256;
-//             printf("%d\n", number);
-//             line_ptr->channel_B_telemetry[i] = number;
-//         }
-//     }
-// }
-
-// void fill_frame()
-// {
-
-//     for (int i = 0; i < 128; i++)
-//     {
-//         struct Line line;
-//         struct Line *line_ptr = &line;
-//         pack_sync(line_ptr, 'A');
-//         pack_space(line_ptr, 'A');
-//         pack_image(line_ptr, 'A');
-//         pack_telemetry(line_ptr, 'A');
-
-//         pack_sync(line_ptr, 'B');
-//         pack_space(line_ptr, 'B');
-//         pack_image(line_ptr, 'B');
-//         pack_telemetry(line_ptr, 'B');
-
-//         frame[i] = line;
-//     }
-// }
-
-// void print_frame()
-// {
-//     printf("line | time | data\n");
-//     for (int i = 0; i < 128; i++)
-//     {
-//         struct Line line = frame[i];
-//         printf("%d%8d%7d\n", i, line.time, line.data);
-//         printf("===================\n");
-//     }
-// }
