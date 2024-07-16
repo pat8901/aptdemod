@@ -35,6 +35,12 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+float linear_interpolate(float sample_1, float sample_2)
+{
+    float result = sample_1 + sample_2;
+    return result;
+}
+
 // TODO:
 // correct the name of this function and determine a way to dynamically size buffer to insert appropriate number of samples
 // to match the size of a byte. Ideally I would want a sample rate of 4160. This would give me a byte per sample.
@@ -48,16 +54,18 @@ void seek(SNDFILE *sndfile, SF_INFO *sfinfo)
     float *old_buffer = (float *)malloc(high_frames_amount * sizeof(float));
     float *new_buffer = (float *)malloc(low_frame_amount * sizeof(float));
 
-    printf("Seek rate: %lf\n", seek_rate);
-
     sf_count_t start_frame = sf_seek(sndfile, 0, SEEK_SET);
     sf_readf_float(sndfile, old_buffer, high_frames_amount);
 
     for (int i = 0; i < 4160; i++)
     {
         sf_count_t next = (sf_count_t)i * seek_rate;
-        float value = old_buffer[i];
-        printf("low:%d high:%d\n", i, next);
+        int position_1 = next;
+        int position_2 = next + 1;
+        float sample_1 = old_buffer[position_1];
+        float sample_2 = old_buffer[position_2];
+        float result = linear_interpolate(sample_1, sample_2);
+        printf("low:%d high(1):%d high(2):%d interpolated value: %f\n", i, position_1, position_2, result);
     }
 }
 

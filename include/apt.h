@@ -30,6 +30,7 @@ void fill_frame();
 void print_frame();
 
 void get_path();
+float linear_interpolate(float sample_1, float sample_2);
 void seek(SNDFILE *sndfile, SF_INFO *sfinfo);
 void read_samples(SNDFILE *sndfile, SF_INFO *sfinfo);
 void print_buffer(float *buffer);
