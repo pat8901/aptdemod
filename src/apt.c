@@ -35,32 +35,50 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-// TODO correct the name of this function and determine a way to dynamically size buffer to insert appropriate number of samples
-//      to match the size of a byte. Ideally I would want a sample rate of 4160. This would give me a byte per sample.
+// TODO:
+// correct the name of this function and determine a way to dynamically size buffer to insert appropriate number of samples
+// to match the size of a byte. Ideally I would want a sample rate of 4160. This would give me a byte per sample.
 void seek(SNDFILE *sndfile, SF_INFO *sfinfo)
 {
-    // sf_count_t my_frame = sf_seek(sndfile, 1, SEEK_CUR);
-    // printf("Frame ID: %ld\n", my_frame);
-    // my_frame = sf_seek(sndfile, 1, SEEK_CUR);
-    // printf("Frame ID: %ld\n", my_frame);
-    // my_frame = sf_seek(sndfile, 1, SEEK_CUR);
-    // printf("Frame ID: %ld\n", my_frame);
-    // my_frame = sf_seek(sndfile, 1, SEEK_CUR);
-    // printf("Frame ID: %ld\n", my_frame);
-    // my_frame = sf_seek(sndfile, -2, SEEK_END);
-    // printf("Frame ID: %ld\n", my_frame);
+    sf_count_t frames = sfinfo->frames;
+    sf_count_t high_frames_amount = 11025;
+    sf_count_t low_frame_amount = 4160;
+    int sample_rate = sfinfo->samplerate;
+    double seek_rate = (double)sample_rate / 4160.0;
+    float *old_buffer = (float *)malloc(high_frames_amount * sizeof(float));
+    float *new_buffer = (float *)malloc(low_frame_amount * sizeof(float));
 
+    printf("Seek rate: %lf\n", seek_rate);
+
+    sf_count_t start_frame = sf_seek(sndfile, 0, SEEK_SET);
+    sf_readf_float(sndfile, old_buffer, high_frames_amount);
+
+    for (int i = 0; i < 4160; i++)
+    {
+        sf_count_t next = (sf_count_t)i * seek_rate;
+        float value = old_buffer[i];
+        printf("low:%d high:%d\n", i, next);
+    }
+}
+
+void read_samples(SNDFILE *sndfile, SF_INFO *sfinfo)
+{
     sf_count_t frames = sfinfo->frames;
     sf_count_t seek_rate = 1;
     int sample_rate = sfinfo->samplerate;
-    float buffer[1];
+    float old_buffer[11025];
+    float buffer[4160];
+    double scaling_factor = (double)sample_rate / 4160.0;
     float *buffer_ptr = &buffer;
 
-    for (int i = 0; i < 256; i += seek_rate)
+    printf("Scale rate: %d\n", (sf_count_t)scaling_factor);
+    printf((sf_count_t)scaling_factor);
+
+    for (int i = 0; i < 10; i += seek_rate)
     {
         // sf_count_t current_frame = sf_seek(sndfile, seek_rate, SEEK_CUR);
         sf_count_t frame_data = sf_read_float(sndfile, buffer, 1);
-        printf("Frame ID: %ld Data: %f\n", i, buffer[0]);
+        printf("Frame ID: %d Data: %f\n", i, buffer[0]);
     }
 }
 

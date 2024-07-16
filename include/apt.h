@@ -31,6 +31,7 @@ void print_frame();
 
 void get_path();
 void seek(SNDFILE *sndfile, SF_INFO *sfinfo);
+void read_samples(SNDFILE *sndfile, SF_INFO *sfinfo);
 void print_buffer(float *buffer);
 
 #endif
