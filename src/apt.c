@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     sfinfo.format = 0;
     const char *file_path = "./documentation/test_audio/20210720111842.wav";
 
-    // Opening audio file
+    // Opening audio file.
     sndfile = sf_open(file_path, SFM_READ, &sfinfo);
     if (!sndfile)
     {
@@ -35,10 +35,14 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-float linear_interpolate(float sample_1, float sample_2)
+// https://www.cuemath.com/linear-interpolation-formula/
+float linear_interpolate(sf_count_t x_0, sf_count_t x_1, float x, float y_0, float y_1, float mu)
 {
-    float result = sample_1 + sample_2;
-    return result;
+    // two different ways to achieve the same result.
+    float y = y_0 + ((x - x_0) * ((y_1 - y_0) / (x_1 - x_0)));
+    float result = (y_0 * (1 - mu)) + (y_1 * mu);
+    // printf("y = %f | result = %f\n", y, result);
+    return y;
 }
 
 // TODO:
@@ -47,25 +51,58 @@ float linear_interpolate(float sample_1, float sample_2)
 void seek(SNDFILE *sndfile, SF_INFO *sfinfo)
 {
     sf_count_t frames = sfinfo->frames;
+    sf_count_t count = 0;
     sf_count_t high_frames_amount = 11025;
     sf_count_t low_frame_amount = 4160;
     int sample_rate = sfinfo->samplerate;
-    double seek_rate = (double)sample_rate / 4160.0;
-    float *old_buffer = (float *)malloc(high_frames_amount * sizeof(float));
-    float *new_buffer = (float *)malloc(low_frame_amount * sizeof(float));
+    float seek_rate = (float)sample_rate / 4160.0;
+    float *buffer_11025 = (float *)malloc(high_frames_amount * sizeof(float));
 
-    sf_count_t start_frame = sf_seek(sndfile, 0, SEEK_SET);
-    sf_readf_float(sndfile, old_buffer, high_frames_amount);
+    float *buffer_4169 = (float *)malloc(low_frame_amount * sizeof(float));
+    float *buffer_4160 = (float *)malloc((sf_count_t)(high_frames_amount / seek_rate) * sizeof(float));
 
-    for (int i = 0; i < 4160; i++)
+    // Downsample from 11025Hz to 4160Hz using Linear Interpolation.
+    // TODO: need to figure out how to grab the last chunk of frames if less than 4160.
+    while (count < frames)
     {
-        sf_count_t next = (sf_count_t)i * seek_rate;
-        int position_1 = next;
-        int position_2 = next + 1;
-        float sample_1 = old_buffer[position_1];
-        float sample_2 = old_buffer[position_2];
-        float result = linear_interpolate(sample_1, sample_2);
-        printf("low:%d high(1):%d high(2):%d interpolated value: %f\n", i, position_1, position_2, result);
+        printf("count: %d\n", count);
+        sf_count_t start_frame = sf_seek(sndfile, count, SEEK_SET);
+        sf_count_t frames_requested = sf_readf_float(sndfile, buffer_11025, high_frames_amount);
+
+        // indicator that the last chunk is less than required amount of frames to create 2 lines of an APT image.
+        // The program has either neared the end of the audio file or the file did not have enough information to begin with.
+        if (frames_requested != 11025)
+        {
+            printf("Remaining chuck-size: %d\n", frames_requested);
+        }
+
+        // This is the dynamic length of our down-sampled audio buffer. This is necessary in order to get every last drop of data
+        // from our wav audio file.
+        int downsample_length = (int)(frames_requested / seek_rate);
+        printf("Downsample length: %d\n", downsample_length);
+        for (int i = 0; i < downsample_length; i++)
+        {
+            // x value
+            float input_index = (float)i * seek_rate;
+            //  x_0, x_1 values
+            sf_count_t position_1 = (sf_count_t)input_index;
+            sf_count_t position_2 = position_1 + 1;
+
+            //  y_0, y_1 values
+            float sample_1 = buffer_11025[position_1];
+            float sample_2 = buffer_11025[position_2];
+            // not used - will get rid of later.
+            float mu = input_index - position_1;
+
+            float result = linear_interpolate(position_1, position_2, input_index, sample_1, sample_2, mu);
+            // printf("================================\n");
+            // printf("4160Hz index: %d\n", i);
+            // printf("11025Hz indexes: %d(%f), %d(%f)\n", position_1, sample_1, position_2, sample_2);
+            // printf("interpolated value: %f\n", result);
+            buffer_4160[i] = result;
+        }
+        // print_buffer_4160(buffer_4160);
+        count = count + frames_requested;
     }
 }
 
@@ -90,8 +127,12 @@ void read_samples(SNDFILE *sndfile, SF_INFO *sfinfo)
     }
 }
 
-void print_buffer(float *buffer)
+void print_buffer_4160(float *buffer)
 {
+    for (int i = 0; i < 4160; i++)
+    {
+        printf("index %d: %f\n", i, buffer[i]);
+    }
 }
 
 void get_path()
