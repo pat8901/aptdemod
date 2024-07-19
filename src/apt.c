@@ -6,6 +6,8 @@
 #include <sndfile.h>
 #include <linux/limits.h>
 #include "apt.h"
+#include "algebra.h"
+#include "utils.h"
 
 int main(int argc, char *argv[])
 {
@@ -25,6 +27,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    // Can turn this into a function
     printf("Frame amount: %ld\n", ptr->frames);
     printf("Sample rate: %d Hz\n", ptr->samplerate);
     printf("Format: %d\n", ptr->format);
@@ -37,18 +40,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-// https://www.cuemath.com/linear-interpolation-formula/
-float linear_interpolate(sf_count_t x_0, sf_count_t x_1, float x, float y_0, float y_1, float mu)
-{
-    // two different ways to achieve the same result.
-    float y = y_0 + ((x - x_0) * ((y_1 - y_0) / (x_1 - x_0)));
-    float result = (y_0 * (1 - mu)) + (y_1 * mu);
-    // printf("y = %f | result = %f\n", y, result);
-    return y;
-}
-
-// TODO:
-// Output file samples are in a loop and file length is too long
+// TODO: convert frequency into digital data to create pixels
 int seek(SNDFILE *sndfile, SF_INFO *sfinfo)
 {
     sf_count_t frames = sfinfo->frames;
@@ -58,14 +50,12 @@ int seek(SNDFILE *sndfile, SF_INFO *sfinfo)
     int sample_rate = sfinfo->samplerate;
     float seek_rate = (float)sample_rate / 4160.0;
     float *buffer_11025 = (float *)malloc(high_frames_amount * sizeof(float));
-    // float *buffer_4160 = (float *)malloc(low_frame_amount * sizeof(float));
 
     // init write output file for 4160Hz downsample
     SF_INFO sfinfo_4160;
     SNDFILE *sndfile_4160;
     sfinfo_4160.samplerate = 4160;
     sfinfo_4160.channels = 1;
-    // sfinfo_4160.format = 65538;
     sfinfo_4160.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
 
     const char *file_path_4160 = "./documentation/output/test.wav";
@@ -77,10 +67,8 @@ int seek(SNDFILE *sndfile, SF_INFO *sfinfo)
     }
 
     // Downsample from 11025Hz to 4160Hz using Linear Interpolation.
-    // TODO: need to figure out how to grab the last chunk of frames if less than 4160.
     while (count < frames)
     {
-
         printf("count: %d\n", count);
         sf_count_t start_frame = sf_seek(sndfile, count, SEEK_SET);
         sf_count_t frames_requested = sf_readf_float(sndfile, buffer_11025, high_frames_amount);
@@ -96,7 +84,7 @@ int seek(SNDFILE *sndfile, SF_INFO *sfinfo)
         // from our wav audio file.
         int downsample_length = (int)(frames_requested / seek_rate);
         printf("Downsample length: %d\n", downsample_length);
-        // Look into the mechanics in how this works more with indexing and overflowing
+        // TODO: Look into the mechanics in how this works more with indexing and overflowing
         float *buffer_4160 = (float *)malloc(downsample_length * sizeof(float));
 
         for (int i = 0; i < downsample_length; i++)
@@ -122,7 +110,7 @@ int seek(SNDFILE *sndfile, SF_INFO *sfinfo)
         }
         // print_buffer_4160(buffer_4160);
 
-        // to implement: write buffer to new file
+        // Writing buffer to output file
         sf_count_t frames_written = sf_writef_float(sndfile_4160, buffer_4160, downsample_length);
         printf("Frames written %d\n", frames_written);
         count = count + frames_requested;
@@ -136,44 +124,10 @@ int seek(SNDFILE *sndfile, SF_INFO *sfinfo)
     return 0;
 }
 
-void read_samples(SNDFILE *sndfile, SF_INFO *sfinfo)
-{
-    sf_count_t frames = sfinfo->frames;
-    sf_count_t seek_rate = 1;
-    int sample_rate = sfinfo->samplerate;
-    float old_buffer[11025];
-    float buffer[4160];
-    double scaling_factor = (double)sample_rate / 4160.0;
-    float *buffer_ptr = &buffer;
-
-    printf("Scale rate: %d\n", (sf_count_t)scaling_factor);
-    printf((sf_count_t)scaling_factor);
-
-    for (int i = 0; i < 10; i += seek_rate)
-    {
-        // sf_count_t current_frame = sf_seek(sndfile, seek_rate, SEEK_CUR);
-        sf_count_t frame_data = sf_read_float(sndfile, buffer, 1);
-        printf("Frame ID: %d Data: %f\n", i, buffer[0]);
-    }
-}
-
 void print_buffer_4160(float *buffer)
 {
     for (int i = 0; i < 4160; i++)
     {
         printf("index %d: %f\n", i, buffer[i]);
-    }
-}
-
-void get_path()
-{
-    char cwd[PATH_MAX];
-    if (getcwd(cwd, sizeof(cwd)) != NULL)
-    {
-        printf("Current working dir: %s\n", cwd);
-    }
-    else
-    {
-        perror("getcwd() error");
     }
 }
