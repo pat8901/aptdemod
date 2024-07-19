@@ -5,7 +5,7 @@ CFLAGS = -Wextra -Wall -g -I"/usr/include" -I"./include"
 
 LDLIBS = -L"/usr/lib/x86_64-linux-gnu/" -lsndfile
 
-SRCS = src/apt.c
+SRCS = src/apt.c src/algebra.c src/utils.c
 
 OBJS = $(SRCS:.c=.o)
 
@@ -13,7 +13,7 @@ EXE = $(BUILD_DIR)/apt_decoder
 
 all: $(EXE)
 
-# Rule to build the target executable:
+# Rule to build the target executable
 $(EXE): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
 

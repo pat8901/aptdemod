@@ -1,5 +1,2 @@
 .vscode
 /build
-/src/apt.o
-/src/algebra.o
-/src/utils.o
