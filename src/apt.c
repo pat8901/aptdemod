@@ -48,8 +48,7 @@ float linear_interpolate(sf_count_t x_0, sf_count_t x_1, float x, float y_0, flo
 }
 
 // TODO:
-// correct the name of this function and determine a way to dynamically size buffer to insert appropriate number of samples
-// to match the size of a byte. Ideally I would want a sample rate of 4160. This would give me a byte per sample.
+// Output file samples are in a loop and file length is too long
 int seek(SNDFILE *sndfile, SF_INFO *sfinfo)
 {
     sf_count_t frames = sfinfo->frames;
@@ -66,7 +65,9 @@ int seek(SNDFILE *sndfile, SF_INFO *sfinfo)
     SNDFILE *sndfile_4160;
     sfinfo_4160.samplerate = 4160;
     sfinfo_4160.channels = 1;
-    sfinfo_4160.format = 65538;
+    // sfinfo_4160.format = 65538;
+    sfinfo_4160.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+
     const char *file_path_4160 = "./documentation/output/test.wav";
     sndfile_4160 = sf_open(file_path_4160, SFM_WRITE, &sfinfo_4160);
     if (!sndfile_4160)
@@ -96,7 +97,7 @@ int seek(SNDFILE *sndfile, SF_INFO *sfinfo)
         int downsample_length = (int)(frames_requested / seek_rate);
         printf("Downsample length: %d\n", downsample_length);
         // Look into the mechanics in how this works more with indexing and overflowing
-        float *buffer_4160 = (float *)malloc((sf_count_t)downsample_length * sizeof(float));
+        float *buffer_4160 = (float *)malloc(downsample_length * sizeof(float));
 
         for (int i = 0; i < downsample_length; i++)
         {
@@ -122,7 +123,8 @@ int seek(SNDFILE *sndfile, SF_INFO *sfinfo)
         // print_buffer_4160(buffer_4160);
 
         // to implement: write buffer to new file
-        sf_count_t frames_written = sf_writef_float(sndfile_4160, buffer_4160, frames_requested);
+        sf_count_t frames_written = sf_writef_float(sndfile_4160, buffer_4160, downsample_length);
+        printf("Frames written %d\n", frames_written);
         count = count + frames_requested;
         free(buffer_4160);
     }
