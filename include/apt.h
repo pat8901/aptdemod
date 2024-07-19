@@ -3,6 +3,7 @@
 #define byte char
 
 // each line is 0.50 seconds long
+// text
 struct Line
 {
 

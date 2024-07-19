@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <linux/limits.h>
 
+// text
 void get_path()
 {
     char cwd[PATH_MAX];
