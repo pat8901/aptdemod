@@ -13,7 +13,7 @@ EXE = $(BUILD_DIR)/apt_decoder
 
 all: $(EXE)
 
-# Rule to build the target executable
+# Rule to build the target executable:
 $(EXE): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDLIBS)
 
