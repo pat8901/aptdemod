@@ -31,7 +31,7 @@ void print_frame();
 
 void get_path();
 float linear_interpolate(sf_count_t x_0, sf_count_t x_1, float x, float y_0, float y_1, float mu);
-void seek(SNDFILE *sndfile, SF_INFO *sfinfo);
+int seek(SNDFILE *sndfile, SF_INFO *sfinfo);
 void read_samples(SNDFILE *sndfile, SF_INFO *sfinfo);
 void print_buffer_4160(float *buffer);
 

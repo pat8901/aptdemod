@@ -48,7 +48,7 @@ float linear_interpolate(sf_count_t x_0, sf_count_t x_1, float x, float y_0, flo
 // TODO:
 // correct the name of this function and determine a way to dynamically size buffer to insert appropriate number of samples
 // to match the size of a byte. Ideally I would want a sample rate of 4160. This would give me a byte per sample.
-void seek(SNDFILE *sndfile, SF_INFO *sfinfo)
+int seek(SNDFILE *sndfile, SF_INFO *sfinfo)
 {
     sf_count_t frames = sfinfo->frames;
     sf_count_t count = 0;
@@ -57,14 +57,27 @@ void seek(SNDFILE *sndfile, SF_INFO *sfinfo)
     int sample_rate = sfinfo->samplerate;
     float seek_rate = (float)sample_rate / 4160.0;
     float *buffer_11025 = (float *)malloc(high_frames_amount * sizeof(float));
+    // float *buffer_4160 = (float *)malloc(low_frame_amount * sizeof(float));
 
-    float *buffer_4169 = (float *)malloc(low_frame_amount * sizeof(float));
-    float *buffer_4160 = (float *)malloc((sf_count_t)(high_frames_amount / seek_rate) * sizeof(float));
+    // init write output file for 4160Hz downsample
+    SF_INFO sfinfo_4160;
+    SNDFILE *sndfile_4160;
+    sfinfo_4160.samplerate = 4160;
+    sfinfo_4160.channels = 1;
+    sfinfo_4160.format = 65538;
+    const char *file_path_4160 = "./documentation/output/test.wav";
+    sndfile_4160 = sf_open(file_path_4160, SFM_WRITE, &sfinfo_4160);
+    if (!sndfile_4160)
+    {
+        printf("Failed to open file: %s\n", sf_strerror(NULL));
+        return -1;
+    }
 
     // Downsample from 11025Hz to 4160Hz using Linear Interpolation.
     // TODO: need to figure out how to grab the last chunk of frames if less than 4160.
     while (count < frames)
     {
+
         printf("count: %d\n", count);
         sf_count_t start_frame = sf_seek(sndfile, count, SEEK_SET);
         sf_count_t frames_requested = sf_readf_float(sndfile, buffer_11025, high_frames_amount);
@@ -80,6 +93,9 @@ void seek(SNDFILE *sndfile, SF_INFO *sfinfo)
         // from our wav audio file.
         int downsample_length = (int)(frames_requested / seek_rate);
         printf("Downsample length: %d\n", downsample_length);
+        // Look into the mechanics in how this works more with indexing and overflowing
+        float *buffer_4160 = (float *)malloc((sf_count_t)downsample_length * sizeof(float));
+
         for (int i = 0; i < downsample_length; i++)
         {
             // x value
@@ -102,8 +118,16 @@ void seek(SNDFILE *sndfile, SF_INFO *sfinfo)
             buffer_4160[i] = result;
         }
         // print_buffer_4160(buffer_4160);
+
+        // to implement: write buffer to new file
         count = count + frames_requested;
+        free(buffer_4160);
     }
+    printf("=================\n");
+    printf("Finished!\n");
+    printf("Count: %d\n", count);
+    free(buffer_11025);
+    return 0;
 }
 
 void read_samples(SNDFILE *sndfile, SF_INFO *sfinfo)
