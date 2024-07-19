@@ -32,6 +32,8 @@ int main(int argc, char *argv[])
 
     seek(sndfile, ptr);
 
+    sf_close(sndfile);
+
     return 0;
 }
 
@@ -120,6 +122,7 @@ int seek(SNDFILE *sndfile, SF_INFO *sfinfo)
         // print_buffer_4160(buffer_4160);
 
         // to implement: write buffer to new file
+        sf_count_t frames_written = sf_writef_float(sndfile_4160, buffer_4160, frames_requested);
         count = count + frames_requested;
         free(buffer_4160);
     }
@@ -127,6 +130,7 @@ int seek(SNDFILE *sndfile, SF_INFO *sfinfo)
     printf("Finished!\n");
     printf("Count: %d\n", count);
     free(buffer_11025);
+    sf_close(sndfile_4160);
     return 0;
 }
 
