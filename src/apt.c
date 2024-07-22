@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <sndfile.h>
 #include <linux/limits.h>
+#include <fftw3.h>
 #include "apt.h"
 #include "algebra.h"
 #include "utils.h"
@@ -32,15 +33,20 @@ int main(int argc, char *argv[])
     printf("Format: %d\n", ptr->format);
     printf("Channels: %d\n\n", sfinfo.channels);
 
-    seek(sndfile, ptr);
-
+    down_sample(sndfile, ptr);
     sf_close(sndfile);
+
+    double *mem_ptr = get_4160_sample();
+    fast_fourier_transform(mem_ptr, 4160);
+    // memory_copy_practice();
+
+    free(mem_ptr);
 
     return 0;
 }
 
 // TODO:
-int seek(SNDFILE *sndfile, SF_INFO *sfinfo)
+int down_sample(SNDFILE *sndfile, SF_INFO *sfinfo)
 {
     sf_count_t frames = sfinfo->frames;
     sf_count_t count = 0;
@@ -101,7 +107,7 @@ int seek(SNDFILE *sndfile, SF_INFO *sfinfo)
             // not used - will get rid of later.
             float mu = input_index - position_1;
 
-            float result = linear_interpolate(position_1, position_2, input_index, sample_1, sample_2, mu);
+            float result = linear_interpolate(position_1, position_2, input_index, sample_1, sample_2);
             // printf("================================\n");
             // printf("4160Hz index: %d\n", i);
             // printf("11025Hz indexes: %d(%f), %d(%f)\n", position_1, sample_1, position_2, sample_2);
@@ -121,6 +127,26 @@ int seek(SNDFILE *sndfile, SF_INFO *sfinfo)
     free(buffer_11025);
     sf_close(sndfile_4160);
     return 0;
+}
+
+double *get_4160_sample()
+{
+    SF_INFO file_info;
+    SNDFILE *file;
+
+    file_info.format = 0;
+    const char *path = "./documentation/output/test.wav";
+
+    file = sf_open(path, SFM_READ, &file_info);
+
+    // TODO: How big should I make each index?
+    double *mem_ptr = (double *)fftw_malloc(sizeof(double) * 4160);
+
+    sf_count_t start_frame = sf_seek(file, 0, SEEK_SET);
+    sf_count_t frames_requested = sf_readf_double(file, mem_ptr, 4160);
+    printf("Frames read: %ld\n", frames_requested);
+
+    return mem_ptr;
 }
 
 void print_buffer_4160(float *buffer)

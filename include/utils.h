@@ -3,5 +3,6 @@
 #define Utils_H
 
 void get_path();
+void memory_copy_practice();
 
 #endif

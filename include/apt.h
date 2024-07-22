@@ -29,8 +29,9 @@ void pack_telemetry(struct Line *line_ptr, char channel);
 void fill_frame();
 void print_frame();
 
-int seek(SNDFILE *sndfile, SF_INFO *sfinfo);
+int down_sample(SNDFILE *sndfile, SF_INFO *sfinfo);
 void read_samples(SNDFILE *sndfile, SF_INFO *sfinfo);
+double *get_4160_sample();
 void print_buffer_4160(float *buffer);
 
 #endif
