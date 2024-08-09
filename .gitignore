@@ -1,2 +1,4 @@
 .vscode
 /build
+/plot/.venv
+plot/src/__pycache__
