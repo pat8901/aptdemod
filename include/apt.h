@@ -32,6 +32,7 @@ void print_frame();
 int down_sample(SNDFILE *sndfile, SF_INFO *sfinfo);
 void read_samples(SNDFILE *sndfile, SF_INFO *sfinfo);
 double *get_4160_sample();
+double *get_11025_sample();
 void print_buffer_4160(float *buffer);
 
 #endif

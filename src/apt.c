@@ -33,14 +33,18 @@ int main(int argc, char *argv[])
     printf("Format: %d\n", ptr->format);
     printf("Channels: %d\n\n", sfinfo.channels);
 
-    down_sample(sndfile, ptr);
+    // down_sample(sndfile, ptr);
     sf_close(sndfile);
 
     double *mem_ptr = get_4160_sample();
-    fast_fourier_transform(mem_ptr, 4160);
-    // memory_copy_practice();
+    double *mem_ptr_11025 = get_11025_sample();
+    // fast_fourier_transform(mem_ptr, 4160);
+    //   fft_test();
+    fftw_test_11025(mem_ptr_11025, 11025);
+    //    memory_copy_practice();
 
     free(mem_ptr);
+    // free(mem_ptr_11025);
 
     return 0;
 }
@@ -142,8 +146,26 @@ double *get_4160_sample()
     // TODO: How big should I make each index?
     double *mem_ptr = (double *)fftw_malloc(sizeof(double) * 4160);
 
-    sf_count_t start_frame = sf_seek(file, 0, SEEK_SET);
+    sf_count_t start_frame = sf_seek(file, 4160 * 10, SEEK_SET);
     sf_count_t frames_requested = sf_readf_double(file, mem_ptr, 4160);
+    printf("Frames read: %ld\n", frames_requested);
+
+    return mem_ptr;
+}
+
+double *get_11025_sample()
+{
+    SF_INFO file_info;
+    SNDFILE *file;
+
+    file_info.format = 0;
+    const char *path = "./documentation/test_audio/20210720111842.wav";
+    file = sf_open(path, SFM_READ, &file_info);
+
+    double *mem_ptr = (double *)fftw_malloc(sizeof(double) * 11025);
+
+    sf_count_t start_frame = sf_seek(file, 0, SEEK_SET);
+    sf_count_t frames_requested = sf_readf_double(file, mem_ptr, 11025);
     printf("Frames read: %ld\n", frames_requested);
 
     return mem_ptr;
