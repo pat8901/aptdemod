@@ -109,9 +109,84 @@ void fft_test()
     }
 }
 
+/* This function passband filters a second of APT data,
+    resulting in isolating 2400 Hz signal */
+void after_filter_11025(double *input_signal, int input_length)
+{
+    fftw_complex *buffer = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
+    fftw_complex *out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
+
+    /* Placing input signal contents into buffer. Can not use memcopy due to
+    differing value types. Must do it manually */
+    for (int i = 0; i < 11025; i++)
+    {
+        buffer[i][0] = (long double)input_signal[i];
+        buffer[i][1] = (long double)0;
+    }
+
+    /* Preform FFT operations*/
+    fftw_plan p = fftw_plan_dft_1d(11025, buffer, out, FFTW_FORWARD, FFTW_ESTIMATE);
+    fftw_execute(p);
+    fftw_destroy_plan(p);
+
+    // Setting negative frequencies to 0.
+    for (int i = 5513; i < 11025; i++)
+    {
+        out[i][0] = (long double)0;
+        out[i][1] = (long double)0;
+    }
+
+    // Removing the 0 frequency
+    out[0][0] = 0;
+    out[0][1] = 0;
+
+    // Apply passband filter
+    passband_filter(out, 2300, 2500);
+
+    FILE *fp2 = fopen("./documentation/output/plots/11025_frequency_filter.txt", "w");
+    fprintf(fp2, "Real,Imaginary\n");
+    for (int i = 0; i < 11025; i++)
+    {
+        fprintf(fp2, "%f, %f\n", out[i][0], out[i][1]);
+    }
+    fclose(fp2);
+
+    // preform the inverse fft
+    fftw_complex *new_real_signal = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
+    fftw_complex *new_buffer = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
+    for (int i = 0; i < 11025; i++)
+    {
+        new_buffer[i][0] = out[i][0];
+        new_buffer[i][1] = out[i][1];
+    }
+    fftw_plan inverse_plan = fftw_plan_dft_1d(11025, new_buffer, new_real_signal, FFTW_BACKWARD, FFTW_ESTIMATE);
+    FILE *fp3 = fopen("./documentation/output/plots/11025_real_signal.txt", "w");
+    fftw_execute(inverse_plan);
+
+    fprintf(fp3, "Real,Imaginary\n");
+    for (int i = 0; i < 11025; i++)
+    {
+        fprintf(fp3, "%f, %f\n", new_real_signal[i][0], new_real_signal[i][1]);
+    }
+    fclose(fp3);
+    fftw_destroy_plan(inverse_plan);
+}
+
+// Takes in a complex signal and applies a passband fillter to get 2400Hz
+void passband_filter(fftw_complex *signal, int from, int to)
+{
+    for (int i = 0; i < 5513; i++)
+    {
+        if (i < from || i > to)
+        {
+            signal[i][0] = 0;
+            signal[i][1] = 0;
+        }
+    }
+}
+
 void fftw_test_11025(double *input_signal, int input_length)
 {
-
     FILE *f_input = fopen("./documentation/output/plots/before_fft_11025_real_signal.txt", "w");
     for (int i = 0; i < 11025; i++)
     {

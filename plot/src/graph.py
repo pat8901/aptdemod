@@ -55,7 +55,7 @@ class Graph:
     def generate_before_graph(self, df):
         fig, ax = plt.subplots()
         ax.plot(df["Real"])
-        ax.set(xlabel="Sample", ylabel="Frequency")
+        ax.set(xlabel="Sample", ylabel="Amplitude")
         ax.grid()
         fig.savefig("base.png")
         plt.show()
@@ -82,7 +82,23 @@ class Graph:
         fig, ax = plt.subplots()
         ax.plot(df["Real"])
         ax.plot(df[" Imaginary"])
-        ax.set(xlabel="Sample", ylabel="Frequency")
+        ax.set(xlabel="Sample", ylabel="Amplitude")
         ax.grid()
         fig.savefig("result.png")
+        plt.show()
+
+    def generate_filter_graph(self, df):
+        fig, ax = plt.subplots()
+        ax.plot(df["Real"])
+        ax.set(xlabel="Frequency Bin", ylabel="Count")
+        ax.grid()
+        fig.savefig("filter_result.png")
+        plt.show()
+
+    def generate_real_graph(self, df):
+        fig, ax = plt.subplots()
+        ax.plot(df["Real"])
+        ax.set(xlabel="Sample", ylabel="amplitude")
+        ax.grid()
+        fig.savefig("real_result.png")
         plt.show()

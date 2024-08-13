@@ -28,20 +28,36 @@ def main():
         "..",
         "documentation/output/plots/after_fft_11025_real_signal.txt",
     )
+    filter_path: str = os.path.join(
+        os.getcwd(),
+        "..",
+        "..",
+        "documentation/output/plots/11025_frequency_filter.txt",
+    )
+    real_path: str = os.path.join(
+        os.getcwd(),
+        "..",
+        "..",
+        "documentation/output/plots/11025_real_signal.txt",
+    )
 
     graph = Graph()
 
     # Load csv data into data frames
-    before = graph.load_into_df(before_path)
-    after_fft = graph.load_into_df(fft_path)
-    after_fft_negative = graph.load_into_df(fft_negative_path)
-    result = graph.load_into_df(result_path)
+    # before = graph.load_into_df(before_path)
+    # after_fft = graph.load_into_df(fft_path)
+    # after_fft_negative = graph.load_into_df(fft_negative_path)
+    # result = graph.load_into_df(result_path)
+    filter = graph.load_into_df(filter_path)
+    real = graph.load_into_df(real_path)
 
     # Generate graphs
-    graph.generate_before_graph(before)
-    graph.generate_after_fft_graph(after_fft)
-    graph.generate_after_fft_negative_graph(after_fft_negative)
-    graph.generate_result_graph(result)
+    # graph.generate_before_graph(before)
+    # graph.generate_after_fft_graph(after_fft)
+    # graph.generate_after_fft_negative_graph(after_fft_negative)
+    # graph.generate_result_graph(result)
+    graph.generate_filter_graph(filter)
+    graph.generate_real_graph(real)
 
 
 if __name__ == "__main__":

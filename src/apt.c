@@ -38,13 +38,16 @@ int main(int argc, char *argv[])
 
     double *mem_ptr = get_4160_sample();
     double *mem_ptr_11025 = get_11025_sample();
+
     // fast_fourier_transform(mem_ptr, 4160);
-    //   fft_test();
-    fftw_test_11025(mem_ptr_11025, 11025);
-    //    memory_copy_practice();
+    // fft_test();
+    // fftw_test_11025(mem_ptr_11025, 11025);
+    // memory_copy_practice();
+
+    after_filter_11025(mem_ptr_11025, 11025);
 
     free(mem_ptr);
-    // free(mem_ptr_11025);
+    free(mem_ptr_11025);
 
     return 0;
 }
