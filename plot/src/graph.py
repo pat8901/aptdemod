@@ -100,5 +100,16 @@ class Graph:
         ax.plot(df["Real"])
         ax.set(xlabel="Sample", ylabel="amplitude")
         ax.grid()
-        fig.savefig("real_result.png")
+        fig.savefig("images/real_result.png")
+        plt.show()
+
+    def generate_graphs(self, df, name: str, domain: str):
+        fig, ax = plt.subplots()
+        ax.plot(df["Real"])
+        if domain == "time":
+            ax.set(xlabel="Sample", ylabel="amplitude")
+        else:
+            ax.set(xlabel="Frequency Bin", ylabel="Count")
+        ax.grid()
+        fig.savefig(f"images/{name}.png")
         plt.show()

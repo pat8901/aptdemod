@@ -9,5 +9,6 @@ void fftw_test_11025(double *input_signal, int input_length);
 void hilbert_transform();
 void after_filter_11025(double *input_signal, int input_length);
 void passband_filter(fftw_complex *signal, int from, int to);
+double *am_demod_11025(double *input_signal, int input_length);
 
 #endif

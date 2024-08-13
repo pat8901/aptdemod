@@ -28,11 +28,6 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    printf("Frame amount: %ld\n", ptr->frames);
-    printf("Sample rate: %d Hz\n", ptr->samplerate);
-    printf("Format: %d\n", ptr->format);
-    printf("Channels: %d\n\n", sfinfo.channels);
-
     // down_sample(sndfile, ptr);
     sf_close(sndfile);
 
@@ -44,7 +39,11 @@ int main(int argc, char *argv[])
     // fftw_test_11025(mem_ptr_11025, 11025);
     // memory_copy_practice();
 
-    after_filter_11025(mem_ptr_11025, 11025);
+    /* 8-13 Tests*/
+    // after_filter_11025(mem_ptr_11025, 11025);
+    double *buffer = am_demod_11025(mem_ptr_11025, 11025);
+    create_audio_single(buffer);
+    create_audio();
 
     free(mem_ptr);
     free(mem_ptr_11025);
@@ -133,6 +132,75 @@ int down_sample(SNDFILE *sndfile, SF_INFO *sfinfo)
     printf("Count: %d\n", count);
     free(buffer_11025);
     sf_close(sndfile_4160);
+    return 0;
+}
+
+/*  Takes a pointer to memory buffer and creates an audio file.
+    This is a test function and designed to create only one second of data.
+*/
+void create_audio_single(double *buffer)
+{
+    sf_count_t buffer_length = 11025;
+
+    // init write output file for 11025Hz downsample
+    SF_INFO sfinfo;
+    SNDFILE *sndfile;
+    sfinfo.samplerate = 11025;
+    sfinfo.channels = 1;
+    sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+
+    // Set up output path for audio file
+    const char *audio_output_path = "./documentation/output/test_11025.wav";
+    sndfile = sf_open(audio_output_path, SFM_WRITE, &sfinfo);
+    if (!sndfile)
+    {
+        printf("Failed to open file: %s\n", sf_strerror(NULL));
+        return -1;
+    }
+
+    // Write buffer out to file.
+    sf_count_t frames_written = sf_writef_double(sndfile, buffer, buffer_length);
+    printf("Frames written %d\n", frames_written);
+
+    printf("=================\n");
+    printf("Finished!\n");
+    sf_close(sndfile);
+    return 0;
+}
+
+/* Demodulates full 11025 Hz audio file*/
+void create_audio()
+{
+    // init write output file for 11025Hz downsample
+    SF_INFO sfinfo;
+    SNDFILE *sndfile;
+    sfinfo.samplerate = 11025;
+    sfinfo.channels = 1;
+    sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+
+    // Set up output path for audio file
+    const char *audio_output_path = "./documentation/output/test_11025.wav";
+    sndfile = sf_open(audio_output_path, SFM_WRITE, &sfinfo);
+    if (!sndfile)
+    {
+        printf("Failed to open file: %s\n", sf_strerror(NULL));
+        return -1;
+    }
+
+    while (0)
+    {
+        double *sample = get_11025_sample();
+        double *buffer = am_demod_11025(sample, 11025);
+        sf_count_t buffer_length = 11025;
+    }
+
+    // Write buffer out to file.
+    sf_count_t frames_written = sf_writef_double(sndfile, buffer, buffer_length);
+    printf("Frames written %d\n", frames_written);
+
+    printf("=================\n");
+    printf("Finished!\n");
+    sf_close(sndfile);
     return 0;
 }
 
