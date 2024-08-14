@@ -189,6 +189,12 @@ double *am_demod_11025(double *input_signal, int input_length)
     }
     fclose(fp5);
 
+    // Clean up
+    free(buffer);
+    free(out);
+    free(new_buffer);
+    free(new_real_signal);
+
     return result;
 }
 

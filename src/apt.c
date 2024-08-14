@@ -31,8 +31,8 @@ int main(int argc, char *argv[])
     // down_sample(sndfile, ptr);
     sf_close(sndfile);
 
-    double *mem_ptr = get_4160_sample();
-    double *mem_ptr_11025 = get_11025_sample();
+    // double *mem_ptr = get_4160_sample();
+    // double *mem_ptr_11025 = get_11025_sample();
 
     // fast_fourier_transform(mem_ptr, 4160);
     // fft_test();
@@ -41,17 +41,16 @@ int main(int argc, char *argv[])
 
     /* 8-13 Tests*/
     // after_filter_11025(mem_ptr_11025, 11025);
-    double *buffer = am_demod_11025(mem_ptr_11025, 11025);
-    create_audio_single(buffer);
+    // double *buffer = am_demod_11025(mem_ptr_11025, 11025);
+    // create_audio_single(buffer);
     create_audio();
 
-    free(mem_ptr);
-    free(mem_ptr_11025);
+    // free(mem_ptr);
+    // free(mem_ptr_11025);
 
     return 0;
 }
 
-// TODO:
 int down_sample(SNDFILE *sndfile, SF_INFO *sfinfo)
 {
     sf_count_t frames = sfinfo->frames;
@@ -171,36 +170,65 @@ void create_audio_single(double *buffer)
 /* Demodulates full 11025 Hz audio file*/
 void create_audio()
 {
+    // init for 11025 Hz audio input file
+    SF_INFO sfinfo_input;
+    SNDFILE *sndfile_input;
+    sfinfo_input.format = 0;
+
+    const char *file_path = "./documentation/test_audio/20210720111842.wav";
+    // Opening input audio file.
+    sndfile_input = sf_open(file_path, SFM_READ, &sfinfo_input);
+    if (!sndfile_input)
+    {
+        printf("Failed to open file: %s\n", sf_strerror(NULL));
+        return -1;
+    }
+    sf_count_t frames = sfinfo_input.frames;
+    sf_count_t count = 0;
+    sf_count_t buffer_length = 11025;
+
     // init write output file for 11025Hz downsample
-    SF_INFO sfinfo;
-    SNDFILE *sndfile;
-    sfinfo.samplerate = 11025;
-    sfinfo.channels = 1;
-    sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+    SF_INFO sfinfo_output;
+    SNDFILE *sndfile_output;
+    sfinfo_output.samplerate = 11025;
+    sfinfo_output.channels = 1;
+    sfinfo_output.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
 
     // Set up output path for audio file
-    const char *audio_output_path = "./documentation/output/test_11025.wav";
-    sndfile = sf_open(audio_output_path, SFM_WRITE, &sfinfo);
-    if (!sndfile)
+    const char *audio_output_path = "./documentation/output/test_full_11025.wav";
+    sndfile_output = sf_open(audio_output_path, SFM_WRITE, &sfinfo_output);
+    if (!sndfile_output)
     {
         printf("Failed to open file: %s\n", sf_strerror(NULL));
         return -1;
     }
 
-    while (0)
-    {
-        double *sample = get_11025_sample();
-        double *buffer = am_demod_11025(sample, 11025);
-        sf_count_t buffer_length = 11025;
-    }
+    // Initializing audio reading
 
-    // Write buffer out to file.
-    sf_count_t frames_written = sf_writef_double(sndfile, buffer, buffer_length);
-    printf("Frames written %d\n", frames_written);
+    while (count < frames)
+    {
+        printf("count: %d\n", count);
+        sf_count_t start_frame = sf_seek(sndfile_input, count, SEEK_SET);
+        double *input_buffer = (double *)fftw_malloc(sizeof(double) * 11025);
+        sf_count_t frames_requested = sf_readf_double(sndfile_input, input_buffer, 11025);
+        printf("Frames read: %ld\n", frames_requested);
+
+        // Getting the demodulated buffer
+        double *intermediate_buffer = am_demod_11025(input_buffer, 11025);
+
+        // Writing demodulated buffer to audio output file.
+        sf_count_t frames_written = sf_writef_double(sndfile_output, intermediate_buffer, buffer_length);
+        printf("Frames written %d\n", frames_written);
+
+        count += frames_requested;
+        free(input_buffer);
+        free(intermediate_buffer);
+    }
 
     printf("=================\n");
     printf("Finished!\n");
-    sf_close(sndfile);
+    sf_close(sndfile_input);
+    sf_close(sndfile_output);
     return 0;
 }
 
