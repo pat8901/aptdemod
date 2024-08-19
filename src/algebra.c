@@ -83,8 +83,9 @@ void fast_fourier_transform(double *input_signal, int input_length)
     fftw_free(out);
 }
 
-/* This function follows instructions from
-
+/*
+Most up to date function to properly demodulate APT signals.
+This function follows instructions from
 */
 double *am_demod_11025(double *input_signal, int input_length)
 {
@@ -224,9 +225,12 @@ void fft_test()
     }
 }
 
-/* This function passband filters a second of APT data,
-    resulting in isolating 2400 Hz signal */
-void after_filter_11025(double *input_signal, int input_length)
+/*
+TODO: Function may be deprecated.
+This function passband filters a second of APT data,
+resulting in isolating 2400 Hz signal.
+*/
+fftw_complex *am_demod_single_11025(double *input_signal, int input_length)
 {
     fftw_complex *buffer = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
     fftw_complex *out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
@@ -285,6 +289,8 @@ void after_filter_11025(double *input_signal, int input_length)
     }
     fclose(fp3);
     fftw_destroy_plan(inverse_plan);
+
+    return new_real_signal;
 }
 
 // Takes in a complex signal and applies a passband fillter to get 2400Hz

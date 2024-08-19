@@ -9,6 +9,7 @@
 #include "apt.h"
 #include "algebra.h"
 #include "utils.h"
+#include "image.h"
 
 int main(int argc, char *argv[])
 {
@@ -32,7 +33,6 @@ int main(int argc, char *argv[])
     sf_close(sndfile);
 
     // double *mem_ptr = get_4160_sample();
-    // double *mem_ptr_11025 = get_11025_sample();
 
     // fast_fourier_transform(mem_ptr, 4160);
     // fft_test();
@@ -43,7 +43,16 @@ int main(int argc, char *argv[])
     // after_filter_11025(mem_ptr_11025, 11025);
     // double *buffer = am_demod_11025(mem_ptr_11025, 11025);
     // create_audio_single(buffer);
-    create_audio();
+    // create_audio();
+    // test_create_image();
+
+    /* 8-14 test, creating image*/
+    // double *mem_ptr_11025 = get_single_buffer_11025();
+    // double *buffer = am_demod_11025(mem_ptr_11025, 11025);
+    // create_test_image(buffer, 5512, 2);
+
+    /* 8-19 test */
+    create_image(5512, 1790);
 
     // free(mem_ptr);
     // free(mem_ptr_11025);
@@ -174,6 +183,7 @@ void create_audio()
     SF_INFO sfinfo_input;
     SNDFILE *sndfile_input;
     sfinfo_input.format = 0;
+    int print = 0;
 
     const char *file_path = "./documentation/test_audio/20210720111842.wav";
     // Opening input audio file.
@@ -211,6 +221,17 @@ void create_audio()
         sf_count_t start_frame = sf_seek(sndfile_input, count, SEEK_SET);
         double *input_buffer = (double *)fftw_malloc(sizeof(double) * 11025);
         sf_count_t frames_requested = sf_readf_double(sndfile_input, input_buffer, 11025);
+        if (print == 0)
+        {
+            FILE *base = fopen("./documentation/output/plots/11025_base.txt", "w");
+            fprintf(base, "Real\n");
+            for (int i = 0; i < 11025; i++)
+            {
+                fprintf(base, "%f\n", input_buffer[i]);
+            }
+            fclose(base);
+            print = 1;
+        }
         printf("Frames read: %ld\n", frames_requested);
 
         // Getting the demodulated buffer
@@ -230,6 +251,247 @@ void create_audio()
     sf_close(sndfile_input);
     sf_close(sndfile_output);
     return 0;
+}
+
+/* Create full image from demodulated normalized APT audio*/
+void create_image(int width, int height)
+{
+    SF_INFO sfinfo_input;
+    SNDFILE *sndfile_input;
+    sfinfo_input.format = 0;
+
+    const char *file_path = "./documentation/test_audio/20210720111842.wav";
+    // Opening input audio file.
+    sndfile_input = sf_open(file_path, SFM_READ, &sfinfo_input);
+    if (!sndfile_input)
+    {
+        printf("Failed to open file: %s\n", sf_strerror(NULL));
+        return -1;
+    }
+    sf_count_t frames = sfinfo_input.frames;
+    sf_count_t count = 0;
+    sf_count_t buffer_length = 11025;
+    FILE *image;
+    image = fopen("documentation/images/full_11025_image.bmp", "w+");
+
+    // Build file header
+    BitMapFileHeader header = {
+        .signature = 0x424D,
+        .file_size = sizeof(BitMapFileHeader) + sizeof(BitMapInfoHeader) + (256 * sizeof(BitMapColorTable)) + (width * height),
+        .reserved = 0,
+        .data_offset = sizeof(BitMapFileHeader) + sizeof(BitMapInfoHeader) + (256 * sizeof(BitMapColorTable)),
+    };
+    BitMapFileHeader *header_ptr = &header;
+
+    // Write file header to image
+    write_file_header(image, header_ptr);
+
+    // Build info header
+    BitMapInfoHeader InfoHeader = {
+        .size = sizeof(BitMapInfoHeader),
+        .width = width,
+        .height = height,
+        .planes = 1,
+        .bits_per_pixel = 8,
+        .compression = 0,
+        .image_size = width * height,
+        .x_pixels_per_m = 0,
+        .y_pixels_per_m = 0,
+        .colors_used = 256,
+        .important_colors = 256,
+    };
+    BitMapInfoHeader *InfoHeader_ptr = &InfoHeader;
+
+    // Write info header to image
+    write_info_header(image, InfoHeader_ptr);
+
+    // Write color table to image
+    write_color_table(image);
+
+    // Get lines of demodulated APT data and write to image
+    while (count < frames)
+    {
+        printf("count: %d\n", count);
+        sf_count_t start_frame = sf_seek(sndfile_input, count, SEEK_SET);
+        double *input_buffer = (double *)fftw_malloc(sizeof(double) * 11025);
+        sf_count_t frames_requested = sf_readf_double(sndfile_input, input_buffer, 11025);
+        printf("Frames read: %ld\n", frames_requested);
+
+        // Getting the demodulated buffer
+        double *intermediate_buffer = am_demod_11025(input_buffer, 11025);
+
+        // Write pixel data to image
+        for (int i = 0; i < 11024; i++)
+        {
+            uint32_t pixel_data = intermediate_buffer[i] * 255;
+            fputc(pixel_data, image);
+        }
+
+        count += frames_requested;
+        free(input_buffer);
+        free(intermediate_buffer);
+    }
+
+    printf("=================\n");
+    printf("Finished!\n");
+    sf_close(sndfile_input);
+    fclose(image);
+    return 0;
+}
+
+/* Test - I will take 1 second of audio and try to output an image
+    use bit masking and bit shifting to get the correct byte. BMP is using little-edian
+*/
+void create_test_image(double *buffer, int width, int height)
+{
+    FILE *image;
+    image = fopen("documentation/images/test_11025_image.bmp", "w+");
+
+    // Build file header
+    BitMapFileHeader header = {
+        .signature = 0x424D,
+        .file_size = sizeof(BitMapFileHeader) + sizeof(BitMapInfoHeader) + (256 * sizeof(BitMapColorTable)) + (width * height),
+        .reserved = 0,
+        .data_offset = sizeof(BitMapFileHeader) + sizeof(BitMapInfoHeader) + (256 * sizeof(BitMapColorTable)),
+    };
+    BitMapFileHeader *header_ptr = &header;
+
+    // Write file header to image
+    write_file_header(image, header_ptr);
+
+    // Build info header
+    BitMapInfoHeader InfoHeader = {
+        .size = sizeof(BitMapInfoHeader),
+        .width = width,
+        .height = height,
+        .planes = 1,
+        .bits_per_pixel = 8,
+        .compression = 0,
+        .image_size = width * height,
+        .x_pixels_per_m = 0,
+        .y_pixels_per_m = 0,
+        .colors_used = 256,
+        .important_colors = 256,
+    };
+    BitMapInfoHeader *InfoHeader_ptr = &InfoHeader;
+
+    // Write info header to image
+    write_info_header(image, InfoHeader_ptr);
+
+    // Write color table to image
+    write_color_table(image);
+
+    // Write pixel data to image
+    for (int i = 0; i < 11024; i++)
+    {
+        uint32_t pixel_value = buffer[i] * 255;
+        printf("%d: %d\n", i, pixel_value);
+        fputc(pixel_value, image);
+    }
+
+    fclose(image);
+}
+
+/* Test to see if I can create a sample bmp image*/
+void create_color_test_image()
+{
+    char header[54] = {
+        0x42,
+        0x4D,
+        0xE6,
+        0x71,
+        0x0B,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x36,
+        0x00,
+        0x00,
+        0x00,
+        0x28,
+        0x00,
+        0x00,
+        0x00,
+        0xF4,
+        0x01,
+        0x00,
+        0x00,
+        0xF4,
+        0x01,
+        0x00,
+        0x00,
+        0x01,
+        0x00,
+        0x18,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0xB0,
+        0x71,
+        0x0B,
+        0x00,
+        0xC4,
+        0x0E,
+        0x00,
+        0x00,
+        0xC4,
+        0x0E,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+    };
+    FILE *image;
+    image = fopen("documentation/images/test_image.bmp", "w+");
+
+    // Writing header to image
+    for (int i = 0; i < 54; i++)
+    {
+        fputc(header[i], image);
+    }
+
+    // Writing colors to image
+    for (int i = 0; i < (100 * 500); i++)
+    {
+        fputc(255, image);
+        fputc(0, image);
+        fputc(0, image);
+    }
+    for (int i = 0; i < (100 * 500); i++)
+    {
+        fputc(0, image);
+        fputc(0, image);
+        fputc(255, image);
+    }
+    for (int i = 0; i < (100 * 500); i++)
+    {
+        fputc(160, image);
+        fputc(0, image);
+        fputc(0, image);
+    }
+    for (int i = 0; i < (100 * 500); i++)
+    {
+        fputc(0, image);
+        fputc(120, image);
+        fputc(120, image);
+    }
+    for (int i = 0; i < (100 * 500); i++)
+    {
+        fputc(120, image);
+        fputc(120, image);
+        fputc(0, image);
+    }
+    fclose(image);
 }
 
 double *get_4160_sample()
@@ -264,6 +526,24 @@ double *get_11025_sample()
     double *mem_ptr = (double *)fftw_malloc(sizeof(double) * 11025);
 
     sf_count_t start_frame = sf_seek(file, 0, SEEK_SET);
+    sf_count_t frames_requested = sf_readf_double(file, mem_ptr, 11025);
+    printf("Frames read: %ld\n", frames_requested);
+
+    return mem_ptr;
+}
+
+double *get_single_buffer_11025()
+{
+    SF_INFO file_info;
+    SNDFILE *file;
+
+    file_info.format = 0;
+    const char *path = "./documentation/test_audio/20210720111842.wav";
+    file = sf_open(path, SFM_READ, &file_info);
+
+    double *mem_ptr = (double *)fftw_malloc(sizeof(double) * 11025);
+
+    sf_count_t start_frame = sf_seek(file, 4000000, SEEK_SET);
     sf_count_t frames_requested = sf_readf_double(file, mem_ptr, 11025);
     printf("Frames read: %ld\n", frames_requested);
 

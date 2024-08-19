@@ -33,8 +33,13 @@ int down_sample(SNDFILE *sndfile, SF_INFO *sfinfo);
 void read_samples(SNDFILE *sndfile, SF_INFO *sfinfo);
 double *get_4160_sample();
 double *get_11025_sample();
+double *get_single_buffer_11025();
 void print_buffer_4160(float *buffer);
 void create_audio_single(double *buffer);
 void create_audio();
+
+void create_image(int width, int height);
+void create_test_image(double *buffer, int width, int height);
+void create_color_test_image();
 
 #endif

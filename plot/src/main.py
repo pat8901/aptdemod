@@ -84,14 +84,22 @@ def main():
         "..",
         "documentation/output/plots/11025_mag_am_demod.txt",
     )
+    base_path: str = os.path.join(
+        os.getcwd(),
+        "..",
+        "..",
+        "documentation/output/plots/11025_base.txt",
+    )
     am_demod = graph.load_into_df(am_demod_path)
     am_demod_filter = graph.load_into_df(am_demod_filter_path)
     am_demod_real = graph.load_into_df(am_demod_real_path)
     am_mag_demod = graph.load_into_df(am_demod_mag_path)
+    base = graph.load_into_df(base_path)
     graph.generate_graphs(am_demod, "am_demod", "frequency")
     graph.generate_graphs(am_demod_filter, "am_demod_path", "frequency")
     graph.generate_graphs(am_demod_real, "am_demod_real", "time")
     graph.generate_graphs(am_mag_demod, "am_demod_mag", "time")
+    graph.generate_graphs(base, "am_base", "time")
 
 
 if __name__ == "__main__":
