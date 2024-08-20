@@ -15,6 +15,14 @@ void get_path()
     }
 }
 
+void print_buffer_double(double *buffer, int length)
+{
+    for (int i = 0; i < length; i++)
+    {
+        printf("index %d: %f\n", i, buffer[i]);
+    }
+}
+
 void memory_copy_practice()
 {
     int *old_ptr = (int *)malloc(sizeof(int) * 10);

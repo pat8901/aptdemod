@@ -32,13 +32,33 @@ typedef struct BitMapColorTable
     uint8_t reserved;
 } BitMapColorTable;
 
+// *Deprecated* Each line is 0.50 seconds long
+typedef struct Line
+{
+    int time;
+    int data;
+    uint8_t channel_A_sync[39];
+    uint8_t channel_A_space[47];
+    uint8_t channel_A_image[909];
+    uint8_t channel_A_telemetry[45];
+    uint8_t channel_B_sync[39];
+    uint8_t channel_B_space[47];
+    uint8_t channel_B_image[909];
+    uint8_t channel_B_telemetry[45];
+} Line;
+
+// Main image creation functions
+void create_image(int width, int height);
+void create_test_image(double *buffer, int width, int height);
+void create_color_test_image();
+
 // Byte writing to image functions
-write_file_header(FILE *image, BitMapFileHeader *file_header);
-write_info_header(FILE *image, BitMapInfoHeader *InfoHeader);
-write_color_table(FILE *image);
+void write_file_header(FILE *image, BitMapFileHeader *file_header);
+void write_info_header(FILE *image, BitMapInfoHeader *InfoHeader);
+void write_color_table(FILE *image);
 
 // Bit operation functions
-parse_word(FILE *image, uint16_t value);
-parse_dword(FILE *image, uint32_t value);
+void parse_word(FILE *image, uint16_t value);
+void parse_dword(FILE *image, uint32_t value);
 
 #endif

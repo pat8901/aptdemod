@@ -3,3 +3,5 @@
 /plot/.venv
 plot/src/__pycache__
 notes.txt
+
+# object files, will change this rule in the future
