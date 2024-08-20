@@ -11,17 +11,6 @@
 #include "utils.h"
 #include "image.h"
 
-int main(int argc, char *argv[])
-{
-    // Create demodulated audio file
-    // create_audio();
-
-    // Create weather satellite image from APT signal
-    create_image(5512, 1790);
-
-    return 0;
-}
-
 int down_sample(SNDFILE *sndfile, SF_INFO *sfinfo)
 {
     sf_count_t frames = sfinfo->frames;
@@ -39,7 +28,7 @@ int down_sample(SNDFILE *sndfile, SF_INFO *sfinfo)
     sfinfo_4160.channels = 1;
     sfinfo_4160.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
 
-    const char *file_path_4160 = "./documentation/output/test.wav";
+    const char *file_path_4160 = "./output/audio/test.wav";
     sndfile_4160 = sf_open(file_path_4160, SFM_WRITE, &sfinfo_4160);
     if (!sndfile_4160)
     {
@@ -120,7 +109,7 @@ void create_audio_single(double *buffer)
     sfinfo.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
 
     // Set up output path for audio file
-    const char *audio_output_path = "./documentation/output/test_11025.wav";
+    const char *audio_output_path = "./output/audio/test_11025.wav";
     sndfile = sf_open(audio_output_path, SFM_WRITE, &sfinfo);
     if (!sndfile)
     {
@@ -167,7 +156,7 @@ void create_audio()
     sfinfo_output.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
 
     // Set up output path for audio file
-    const char *audio_output_path = "./documentation/output/test_full_11025.wav";
+    const char *audio_output_path = "./output/audio/apt_demodulated.wav";
     sndfile_output = sf_open(audio_output_path, SFM_WRITE, &sfinfo_output);
     if (!sndfile_output)
     {

@@ -4,9 +4,11 @@
 #include <fftw3.h>
 #include <math.h>
 #include <string.h>
+#include "algebra.h"
 
 /*
 Most up to date function to properly demodulate full APT signals.
+TODO: get rid of unnecessary file check-in creation
 */
 double *am_demodulate(double *input_signal, int input_length)
 {
@@ -40,7 +42,7 @@ double *am_demodulate(double *input_signal, int input_length)
         out[11024][1] = imaginary_temp;
     }
 
-    FILE *fp2 = fopen("./documentation/output/plots/11025_am_demod.txt", "w");
+    FILE *fp2 = fopen("./output/text/11025_am_demod.txt", "w");
     fprintf(fp2, "Real,Imaginary\n");
     for (int i = 0; i < 11025; i++)
     {
@@ -57,7 +59,7 @@ double *am_demodulate(double *input_signal, int input_length)
             out[i][1] = 0;
         }
     }
-    FILE *fp3 = fopen("./documentation/output/plots/11025_filter_am_demod.txt", "w");
+    FILE *fp3 = fopen("./output/text/11025_filter_am_demod.txt", "w");
     fprintf(fp3, "Real,Imaginary\n");
     for (int i = 0; i < 11025; i++)
     {
@@ -81,7 +83,7 @@ double *am_demodulate(double *input_signal, int input_length)
         new_buffer[i][1] = out[i][1];
     }
     fftw_plan inverse_plan = fftw_plan_dft_1d(11025, new_buffer, new_real_signal, FFTW_BACKWARD, FFTW_ESTIMATE);
-    FILE *fp4 = fopen("./documentation/output/plots/11025_real_am_demod.txt", "w");
+    FILE *fp4 = fopen("./output/text/11025_real_am_demod.txt", "w");
     fftw_execute(inverse_plan);
 
     fprintf(fp4, "Real,Imaginary\n");
@@ -103,7 +105,7 @@ double *am_demodulate(double *input_signal, int input_length)
         result[i] = magnitude;
     }
 
-    FILE *fp5 = fopen("./documentation/output/plots/11025_mag_am_demod.txt", "w");
+    FILE *fp5 = fopen("./output/text/11025_mag_am_demod.txt", "w");
     fprintf(fp5, "Real\n");
     for (int i = 0; i < 11025; i++)
     {
@@ -156,7 +158,7 @@ fftw_complex *am_demod_single_11025(double *input_signal, int input_length)
     // Apply passband filter
     passband_filter(out, 2300, 2500);
 
-    FILE *fp2 = fopen("./documentation/output/plots/11025_frequency_filter.txt", "w");
+    FILE *fp2 = fopen("./output/text/11025_frequency_filter.txt", "w");
     fprintf(fp2, "Real,Imaginary\n");
     for (int i = 0; i < 11025; i++)
     {
@@ -173,7 +175,7 @@ fftw_complex *am_demod_single_11025(double *input_signal, int input_length)
         new_buffer[i][1] = out[i][1];
     }
     fftw_plan inverse_plan = fftw_plan_dft_1d(11025, new_buffer, new_real_signal, FFTW_BACKWARD, FFTW_ESTIMATE);
-    FILE *fp3 = fopen("./documentation/output/plots/11025_real_signal.txt", "w");
+    FILE *fp3 = fopen("./output/text/11025_real_signal.txt", "w");
     fftw_execute(inverse_plan);
 
     fprintf(fp3, "Real,Imaginary\n");

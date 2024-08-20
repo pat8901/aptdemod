@@ -5,3 +5,8 @@ plot/src/__pycache__
 notes.txt
 
 # object files, will change this rule in the future
+src/algebra.o
+src/apt.o
+src/image.o
+src/main.o
+src/utils.o

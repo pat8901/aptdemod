@@ -1,15 +1,23 @@
 #include <stdio.h>
 #include <sndfile.h>
+#include <stdlib.h>
+#include <fftw3.h>
+#include <math.h>
+#include "algebra.h"
+#include "utils.h"
 #include "image.h"
 
-/* Create full image from demodulated normalized APT audio*/
-void create_image(int width, int height)
+/*
+Create full image from demodulated normalized APT audio
+Can only handle 11025Hz audio files. This will be changed in a future update
+*/
+int create_image(int width)
 {
     SF_INFO sfinfo_input;
     SNDFILE *sndfile_input;
     sfinfo_input.format = 0;
 
-    const char *file_path = "./documentation/test_audio/20210720111842.wav";
+    const char *file_path = "./documentation/samples/audio/20210720111842.wav";
     // Opening input audio file.
     sndfile_input = sf_open(file_path, SFM_READ, &sfinfo_input);
     if (!sndfile_input)
@@ -17,11 +25,15 @@ void create_image(int width, int height)
         printf("Failed to open file: %s\n", sf_strerror(NULL));
         return -1;
     }
+
     sf_count_t frames = sfinfo_input.frames;
+    // Calculates the height of images based on total frames and width
+    int height = ceil((double)(frames / 5512));
     sf_count_t count = 0;
     sf_count_t buffer_length = 11025;
+
     FILE *image;
-    image = fopen("documentation/images/full_11025_image.bmp", "w+");
+    image = fopen("output/images/apt_image.bmp", "w+");
 
     // Build file header
     BitMapFileHeader header = {

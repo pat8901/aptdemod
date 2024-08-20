@@ -48,7 +48,7 @@ typedef struct Line
 } Line;
 
 // Main image creation functions
-void create_image(int width, int height);
+int create_image(int width);
 void create_test_image(double *buffer, int width, int height);
 void create_color_test_image();
 
