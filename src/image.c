@@ -97,7 +97,129 @@ int create_image(int width)
         printf("Frames read: %ld\n", frames_requested);
 
         // Getting the demodulated buffer
-        double *intermediate_buffer = am_demodulate(input_buffer, 11025);
+        double *intermediate_buffer = am_demodulate(input_buffer, 11025, ON);
+
+        // Write pixel data to image
+        for (int i = 0; i < 11024; i++)
+        {
+            uint32_t pixel_data = intermediate_buffer[i] * 255;
+            fputc(pixel_data, image);
+        }
+
+        count += frames_requested;
+        free(input_buffer);
+        free(intermediate_buffer);
+    }
+
+    printf("=================\n");
+    printf("Finished!\n");
+    sf_close(sndfile_input);
+    fclose(image);
+    return 0;
+}
+
+/*
+Create full image from demodulated normalized APT audio in reverse.
+This is necessary for bmp files. Can only handle 11025Hz audio files.
+*/
+int create_image_reverse(char *path, char *output_name, int width)
+{
+    SF_INFO sfinfo_input;
+    SNDFILE *sndfile_input;
+    sfinfo_input.format = 0;
+
+    const char *file_path = path;
+    // Opening input audio file.
+    sndfile_input = sf_open(file_path, SFM_READ, &sfinfo_input);
+    if (!sndfile_input)
+    {
+        printf("Failed to open file: %s\n", sf_strerror(NULL));
+        return -1;
+    }
+
+    sf_count_t frames = sfinfo_input.frames;
+    // Calculates the height of images based on total frames and width
+    int height = ceil((double)(frames / 5512));
+    sf_count_t count = 0;
+    sf_count_t buffer_length = 11025;
+
+    FILE *image;
+    // TODO: Add a check to see if this path exist and handle if not
+    image = fopen(output_name, "w+");
+
+    // Build file header
+    BitMapFileHeader header = {
+        .signature = 0x424D,
+        .file_size = sizeof(BitMapFileHeader) + sizeof(BitMapInfoHeader) + (256 * sizeof(BitMapColorTable)) + (width * height),
+        .reserved = 0,
+        .data_offset = sizeof(BitMapFileHeader) + sizeof(BitMapInfoHeader) + (256 * sizeof(BitMapColorTable)),
+    };
+    BitMapFileHeader *header_ptr = &header;
+
+    // Write file header to image
+    write_file_header(image, header_ptr);
+
+    // Build info header
+    BitMapInfoHeader InfoHeader = {
+        .size = sizeof(BitMapInfoHeader),
+        .width = width,
+        .height = height,
+        .planes = 1,
+        .bits_per_pixel = 8,
+        .compression = 0,
+        .image_size = width * height,
+        .x_pixels_per_m = 0,
+        .y_pixels_per_m = 0,
+        .colors_used = 256,
+        .important_colors = 256,
+    };
+    BitMapInfoHeader *InfoHeader_ptr = &InfoHeader;
+
+    // Write info header to image
+    write_info_header(image, InfoHeader_ptr);
+
+    // Write color table to image
+    write_color_table(image);
+
+    // Get lines of demodulated APT data and write to image
+    while (frames - 11025 >= 0)
+    {
+        frames -= 11025;
+        printf("frames remaining: %ld\n", frames);
+
+        sf_count_t start_frame = sf_seek(sndfile_input, frames, SEEK_SET);
+        double *input_buffer = (double *)fftw_malloc(sizeof(double) * 11025);
+        sf_count_t frames_requested = sf_readf_double(sndfile_input, input_buffer, 11025);
+        printf("Frames read: %ld\n", frames_requested);
+
+        // Getting the demodulated buffer
+        // TODO: How would you demod the signal if length less than 11025? pad with 0s ?
+        double *intermediate_buffer = am_demodulate(input_buffer, 11025, OFF);
+
+        // Write pixel data to image
+        for (int i = 0; i < 11024; i++)
+        {
+            uint32_t pixel_data = intermediate_buffer[i] * 255;
+            fputc(pixel_data, image);
+        }
+
+        count += frames_requested;
+        free(input_buffer);
+        free(intermediate_buffer);
+    }
+
+    // Get the last remaining frames that is less than 11025 if they exist
+    printf("Frames remaining: %ld\n", frames);
+    if (frames != 0)
+    {
+        sf_count_t start_frame = sf_seek(sndfile_input, 0, SEEK_SET);
+        double *input_buffer = (double *)fftw_malloc(sizeof(double) * 11025);
+        sf_count_t frames_requested = sf_readf_double(sndfile_input, input_buffer, frames);
+        printf("Frames read: %ld\n", frames_requested);
+
+        // Getting the demodulated buffer
+        // TODO: How would you demod the signal if length less than 11025? pad with 0s ?
+        double *intermediate_buffer = am_demodulate(input_buffer, 11025, OFF);
 
         // Write pixel data to image
         for (int i = 0; i < 11024; i++)

@@ -27,8 +27,10 @@
 /*
 Most up to date function to properly demodulate full APT signals.
 TODO: get rid of unnecessary file check-in creation
+TODO: would it be possible to load the whole audio file in one
+TODO: What dictates the brightness of my image. How can I make the features brighter?
 */
-double *am_demodulate(double *input_signal, int input_length)
+double *am_demodulate(double *input_signal, int input_length, int generate_stats)
 {
     fftw_complex *buffer = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
     fftw_complex *out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
@@ -60,13 +62,16 @@ double *am_demodulate(double *input_signal, int input_length)
         out[11024][1] = imaginary_temp;
     }
 
-    FILE *fp2 = fopen("./output/text/11025_am_demod.txt", "w");
-    fprintf(fp2, "Real,Imaginary\n");
-    for (int i = 0; i < 11025; i++)
+    if (generate_stats == ON)
     {
-        fprintf(fp2, "%f, %f\n", out[i][0], out[i][1]);
+        FILE *fp2 = fopen("./output/text/11025_am_demod.txt", "w");
+        fprintf(fp2, "Real,Imaginary\n");
+        for (int i = 0; i < 11025; i++)
+        {
+            fprintf(fp2, "%f, %f\n", out[i][0], out[i][1]);
+        }
+        fclose(fp2);
     }
-    fclose(fp2);
 
     // Apply passband filter
     for (int i = 0; i < 11025; i++)
@@ -77,13 +82,17 @@ double *am_demodulate(double *input_signal, int input_length)
             out[i][1] = 0;
         }
     }
-    FILE *fp3 = fopen("./output/text/11025_filter_am_demod.txt", "w");
-    fprintf(fp3, "Real,Imaginary\n");
-    for (int i = 0; i < 11025; i++)
+
+    if (generate_stats == ON)
     {
-        fprintf(fp3, "%f, %f\n", out[i][0], out[i][1]);
+        FILE *fp3 = fopen("./output/text/11025_filter_am_demod.txt", "w");
+        fprintf(fp3, "Real,Imaginary\n");
+        for (int i = 0; i < 11025; i++)
+        {
+            fprintf(fp3, "%f, %f\n", out[i][0], out[i][1]);
+        }
+        fclose(fp3);
     }
-    fclose(fp3);
 
     // Normalize
     for (int i = 0; i < 11025; i++)
@@ -101,16 +110,19 @@ double *am_demodulate(double *input_signal, int input_length)
         new_buffer[i][1] = out[i][1];
     }
     fftw_plan inverse_plan = fftw_plan_dft_1d(11025, new_buffer, new_real_signal, FFTW_BACKWARD, FFTW_ESTIMATE);
-    FILE *fp4 = fopen("./output/text/11025_real_am_demod.txt", "w");
     fftw_execute(inverse_plan);
-
-    fprintf(fp4, "Real,Imaginary\n");
-    for (int i = 0; i < 11025; i++)
-    {
-        fprintf(fp4, "%f, %f\n", new_real_signal[i][0], new_real_signal[i][1]);
-    }
-    fclose(fp4);
     fftw_destroy_plan(inverse_plan);
+
+    if (generate_stats == ON)
+    {
+        FILE *fp4 = fopen("./output/text/11025_real_am_demod.txt", "w");
+        fprintf(fp4, "Real,Imaginary\n");
+        for (int i = 0; i < 11025; i++)
+        {
+            fprintf(fp4, "%f, %f\n", new_real_signal[i][0], new_real_signal[i][1]);
+        }
+        fclose(fp4);
+    }
 
     // Magnitude calculation
     double *result = (double *)malloc(sizeof(double) * 11025);
@@ -123,13 +135,16 @@ double *am_demodulate(double *input_signal, int input_length)
         result[i] = magnitude;
     }
 
-    FILE *fp5 = fopen("./output/text/11025_mag_am_demod.txt", "w");
-    fprintf(fp5, "Real\n");
-    for (int i = 0; i < 11025; i++)
+    if (generate_stats == ON)
     {
-        fprintf(fp5, "%f\n", result[i]);
+        FILE *fp5 = fopen("./output/text/11025_mag_am_demod.txt", "w");
+        fprintf(fp5, "Real\n");
+        for (int i = 0; i < 11025; i++)
+        {
+            fprintf(fp5, "%f\n", result[i]);
+        }
+        fclose(fp5);
     }
-    fclose(fp5);
 
     // Clean up
     free(buffer);

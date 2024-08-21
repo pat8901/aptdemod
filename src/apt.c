@@ -160,7 +160,7 @@ void create_audio()
     if (!sndfile_input)
     {
         printf("Failed to open file: %s\n", sf_strerror(NULL));
-        return -1;
+        return;
     }
     sf_count_t frames = sfinfo_input.frames;
     sf_count_t count = 0;
@@ -179,7 +179,7 @@ void create_audio()
     if (!sndfile_output)
     {
         printf("Failed to open file: %s\n", sf_strerror(NULL));
-        return -1;
+        return;
     }
 
     // Initializing audio reading
@@ -204,7 +204,7 @@ void create_audio()
         printf("Frames read: %ld\n", frames_requested);
 
         // Getting the demodulated buffer
-        double *intermediate_buffer = am_demodulate(input_buffer, 11025);
+        double *intermediate_buffer = am_demodulate(input_buffer, 11025, ON);
 
         // Writing demodulated buffer to audio output file.
         sf_count_t frames_written = sf_writef_double(sndfile_output, intermediate_buffer, buffer_length);
@@ -219,7 +219,7 @@ void create_audio()
     printf("Finished!\n");
     sf_close(sndfile_input);
     sf_close(sndfile_output);
-    return 0;
+    return;
 }
 
 /* Deprecated, used for testing */

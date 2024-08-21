@@ -29,6 +29,10 @@ int main(int argc, char *argv[])
     // create_audio();
 
     // Create weather satellite image from APT signal
-    create_image(5512);
+    // create_image(5512);
+
+    // create_image_reverse("./documentation/samples/audio/20210720111842.wav", "output/images/apt_image_reverse_1.bmp", 5512);
+    create_image_reverse("documentation/samples/audio/NOAA1920190808-070600.wav", "output/images/apt_image_reverse_2.bmp", 5512);
+
     return 0;
 }

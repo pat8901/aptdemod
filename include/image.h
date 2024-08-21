@@ -67,6 +67,7 @@ typedef struct Line
 
 // Main image creation functions
 int create_image(int width);
+int create_image_reverse(char *path, char *output_name, int width);
 void create_test_image(double *buffer, int width, int height);
 void create_color_test_image();
 
