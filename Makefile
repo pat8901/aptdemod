@@ -5,7 +5,7 @@ CFLAGS = -Wextra -Wall -g -I"/usr/include" -I"./include"
 
 LDLIBS = -L"/usr/lib/x86_64-linux-gnu/" -lsndfile -lfftw3 -lm
 
-SRCS = src/main.c src/apt.c src/algebra.c src/utils.c src/image.c
+SRCS = src-core/main.c src-core/apt.c src-core/algebra.c src-core/utils.c src-core/image.c
 
 OBJS = $(SRCS:.c=.o)
 

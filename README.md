@@ -12,3 +12,16 @@ This program was developed for Linux. Testing has only been done for Linux based
 
 
 ## How to use
+ 
+## APT
+
+## TODO
+    Short term:
+    Add function to down sample 1 second of APT data from 11025Hz to 4160HZ.
+    Add support for sync finding to line up images more accurately.
+    Improve/refactor python plotting.
+    Improve makefile.
+
+    Long term:
+    Add cli support.
+    Add real time demodulation.
