@@ -23,41 +23,49 @@
 #include <sndfile.h>
 #include "apt.h"
 #include "image.h"
+#include <getopt.h>
 
+void menu_about();
 void menu_help();
 void command_verbose();
 
 int main(int argc, char *argv[])
 {
-    if (argc >= 2)
-    {
-        // Check for help and ignore all other commands
-        for (int i = 1; i < argc; i++)
-        {
-            if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0)
-            {
-                menu_help();
-                return 1;
-            }
-        }
 
-        // Process commands
-        for (int i = 1; i < argc; i++)
+    static struct option const long_options[] =
         {
-            if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--verbose") == 0)
-            {
-                command_verbose();
-            }
-            else
-            {
-                printf("Unknown command: %s\n", argv[i]);
-            }
+            {"help", no_argument, NULL, 'h'},
+            {"verbose", no_argument, NULL, 'v'},
+            {"about", no_argument, NULL, 'a'},
+            {NULL, 0, NULL, 0},
+        };
+
+    int opt = 0;
+
+    // Parse args and set args attributes in a struct
+    // use "cat" as inspiration
+    while ((opt = getopt_long(argc, argv, "vah", long_options, NULL)) != -1)
+    {
+        switch (opt)
+        {
+        case 'v':
+            command_verbose();
+            break;
+        case 'a':
+            menu_about();
+            return 0;
+        case 'h':
+            menu_help();
+            return 0;
+        default:
+            menu_help();
+            return 0;
         }
     }
-    else
-    {
-        printf("No commands given\n");
-    }
+
+    // Analyze arg struct
+
+    // Run program with given args
 
     // Create demodulated audio file
     // create_audio();
@@ -69,6 +77,11 @@ int main(int argc, char *argv[])
     // create_image_reverse("documentation/samples/audio/NOAA1920190808-070600.wav", "output/images/apt_image_reverse_2.bmp", 5512);
 
     return 0;
+}
+
+void menu_about()
+{
+    printf("*** About Menu ***\n");
 }
 
 void menu_help()
