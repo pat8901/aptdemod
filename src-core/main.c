@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <sndfile.h>
-#include "apt.h"
+#include "audio.h"
 #include "image.h"
 #include <getopt.h>
 
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 
     int opt = 0;
 
-    // Parse args and set args attributes in a struct
+    // 1. Parse args and set args attributes in a struct
     // use "cat" as inspiration
     while ((opt = getopt_long(argc, argv, "vah", long_options, NULL)) != -1)
     {
@@ -63,18 +63,20 @@ int main(int argc, char *argv[])
         }
     }
 
-    // Analyze arg struct
+    // 2. Analyze arg struct
 
-    // Run program with given args
+    // 3. Run program with given args
 
+    /*
     // Create demodulated audio file
-    // create_audio();
+    create_audio();
 
     // Create weather satellite image from APT signal
-    // create_image(5512);
+    create_image(5512);
 
-    // create_image_reverse("./documentation/samples/audio/20210720111842.wav", "output/images/apt_image_reverse_1.bmp", 5512);
-    // create_image_reverse("documentation/samples/audio/NOAA1920190808-070600.wav", "output/images/apt_image_reverse_2.bmp", 5512);
+    create_image_reverse("./documentation/samples/audio/20210720111842.wav", "output/images/apt_image_reverse_1.bmp", 5512);
+    create_image_reverse("documentation/samples/audio/NOAA1920190808-070600.wav", "output/images/apt_image_reverse_2.bmp", 5512);
+    */
 
     return 0;
 }
