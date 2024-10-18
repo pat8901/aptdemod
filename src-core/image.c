@@ -25,18 +25,20 @@
 #include "utils.h"
 #include "image.h"
 
-/*
-Create full image from demodulated normalized APT audio
-Can only handle 11025Hz audio files. This will be changed in a future update
-*/
+/* Create APT image from normalized demodulated 11025hz audio.
+   Can only handle 11025Hz audio files.
+
+   int width - The amount of pixels for the output image*/
 int create_image(int width)
 {
+    /* Initializing 11025hz audio input file */
     SF_INFO sfinfo_input;
     SNDFILE *sndfile_input;
     sfinfo_input.format = 0;
+    sf_count_t count = 0;
 
+    /* Opening 11025hz audio input file. */
     const char *file_path = "./documentation/samples/audio/20210720111842.wav";
-    // Opening input audio file.
     sndfile_input = sf_open(file_path, SFM_READ, &sfinfo_input);
     if (!sndfile_input)
     {
@@ -44,16 +46,16 @@ int create_image(int width)
         return -1;
     }
 
+    /* Calculates the height of the output image given
+       the number of frames and the width. */
     sf_count_t frames = sfinfo_input.frames;
-    // Calculates the height of images based on total frames and width
     int height = ceil((double)(frames / 5512));
-    sf_count_t count = 0;
-    sf_count_t buffer_length = 11025;
 
+    /* Initialize and open bmp image file. */
     FILE *image;
     image = fopen("output/images/apt_image.bmp", "w+");
 
-    // Build file header
+    /* Build bmp file header */
     BitMapFileHeader header = {
         .signature = 0x424D,
         .file_size = sizeof(BitMapFileHeader) + sizeof(BitMapInfoHeader) + (256 * sizeof(BitMapColorTable)) + (width * height),
@@ -62,10 +64,7 @@ int create_image(int width)
     };
     BitMapFileHeader *header_ptr = &header;
 
-    // Write file header to image
-    write_file_header(image, header_ptr);
-
-    // Build info header
+    /* Build bmp info header. */
     BitMapInfoHeader InfoHeader = {
         .size = sizeof(BitMapInfoHeader),
         .width = width,
@@ -81,25 +80,28 @@ int create_image(int width)
     };
     BitMapInfoHeader *InfoHeader_ptr = &InfoHeader;
 
-    // Write info header to image
+    /* Write bmp file header to image. */
+    write_file_header(image, header_ptr);
+    /* Write bmp info header to image. */
     write_info_header(image, InfoHeader_ptr);
-
-    // Write color table to image
+    /* Write bmp color table to image. */
     write_color_table(image);
 
-    // Get lines of demodulated APT data and write to image
+    /* Get frame buffers of demodulated APT audio and write to image. */
     while (count < frames)
     {
+        /* Seek to the requested 11025hz frame and
+           read a selected amount of samples into a frame buffer. */
         printf("count: %d\n", count);
         sf_count_t start_frame = sf_seek(sndfile_input, count, SEEK_SET);
         double *input_buffer = (double *)fftw_malloc(sizeof(double) * 11025);
         sf_count_t frames_requested = sf_readf_double(sndfile_input, input_buffer, 11025);
         printf("Frames read: %ld\n", frames_requested);
 
-        // Getting the demodulated buffer
+        /* Demodulate 11025hz input frame buffer. */
         double *intermediate_buffer = am_demodulate(input_buffer, 11025, ON);
 
-        // Write pixel data to image
+        /* Write pixel data to image. */
         for (int i = 0; i < 11024; i++)
         {
             uint32_t pixel_data = intermediate_buffer[i] * 255;
@@ -107,29 +109,36 @@ int create_image(int width)
         }
 
         count += frames_requested;
+
+        /* Clean up. */
         free(input_buffer);
         free(intermediate_buffer);
     }
 
     printf("=================\n");
     printf("Finished!\n");
+
+    /* Clean up. */
     sf_close(sndfile_input);
     fclose(image);
+
     return 0;
 }
 
-/*
-Create full image from demodulated normalized APT audio in reverse.
-This is necessary for bmp files. Can only handle 11025Hz audio files.
-*/
+/* Create APT image from normalized demodulated 11025hz audio in reverse.
+   This is necessary for bmp files. Can only handle 11025Hz audio files.
+
+   int width - The amount of pixels for the output image*/
 int create_image_reverse(char *path, char *output_name, int width)
 {
+    /* Initialize 11025hz audio input file. */
     SF_INFO sfinfo_input;
     SNDFILE *sndfile_input;
     sfinfo_input.format = 0;
+    sf_count_t count = 0;
 
+    /* Open 11025hz input audio file for reading. */
     const char *file_path = path;
-    // Opening input audio file.
     sndfile_input = sf_open(file_path, SFM_READ, &sfinfo_input);
     if (!sndfile_input)
     {
@@ -137,17 +146,16 @@ int create_image_reverse(char *path, char *output_name, int width)
         return -1;
     }
 
+    /* Calculates the height of the output image given
+       the number of frames and the width. */
     sf_count_t frames = sfinfo_input.frames;
-    // Calculates the height of images based on total frames and width
     int height = ceil((double)(frames / 5512));
-    sf_count_t count = 0;
-    sf_count_t buffer_length = 11025;
 
+    /* Initialize and open bmp image file. */
     FILE *image;
-    // TODO: Add a check to see if this path exist and handle if not
     image = fopen(output_name, "w+");
 
-    // Build file header
+    /* Build bmp file header. */
     BitMapFileHeader header = {
         .signature = 0x424D,
         .file_size = sizeof(BitMapFileHeader) + sizeof(BitMapInfoHeader) + (256 * sizeof(BitMapColorTable)) + (width * height),
@@ -156,10 +164,7 @@ int create_image_reverse(char *path, char *output_name, int width)
     };
     BitMapFileHeader *header_ptr = &header;
 
-    // Write file header to image
-    write_file_header(image, header_ptr);
-
-    // Build info header
+    /* Build bmp info header. */
     BitMapInfoHeader InfoHeader = {
         .size = sizeof(BitMapInfoHeader),
         .width = width,
@@ -175,28 +180,29 @@ int create_image_reverse(char *path, char *output_name, int width)
     };
     BitMapInfoHeader *InfoHeader_ptr = &InfoHeader;
 
-    // Write info header to image
+    /* Write bmp file header to image. */
+    write_file_header(image, header_ptr);
+    /* Write bmp info header to image */
     write_info_header(image, InfoHeader_ptr);
-
-    // Write color table to image
+    /* Write bmp color table to image. */
     write_color_table(image);
 
-    // Get lines of demodulated APT data and write to image
+    /* Get frame buffers of demodulated APT audio and write to image. */
     while (frames - 11025 >= 0)
     {
+        /* Seek to the requested 11025hz frame and
+           read a selected amount of samples into a frame buffer. */
         frames -= 11025;
         printf("frames remaining: %ld\n", frames);
-
         sf_count_t start_frame = sf_seek(sndfile_input, frames, SEEK_SET);
         double *input_buffer = (double *)fftw_malloc(sizeof(double) * 11025);
         sf_count_t frames_requested = sf_readf_double(sndfile_input, input_buffer, 11025);
         printf("Frames read: %ld\n", frames_requested);
 
-        // Getting the demodulated buffer
-        // TODO: How would you demod the signal if length less than 11025? pad with 0s ?
+        /* Demodulate 11025hz input frame buffer. */
         double *intermediate_buffer = am_demodulate(input_buffer, 11025, OFF);
 
-        // Write pixel data to image
+        /* Write pixel data to image. */
         for (int i = 0; i < 11024; i++)
         {
             uint32_t pixel_data = intermediate_buffer[i] * 255;
@@ -204,24 +210,28 @@ int create_image_reverse(char *path, char *output_name, int width)
         }
 
         count += frames_requested;
+
+        /* Clean up. */
         free(input_buffer);
         free(intermediate_buffer);
     }
 
-    // Get the last remaining frames that is less than 11025 if they exist
+    /* Processing the remaining frames less than 11025, if they exist. */
     printf("Frames remaining: %ld\n", frames);
     if (frames != 0)
     {
+        /* Seek to the requested 11025hz frame and
+           read a selected amount of samples into a frame buffer. */
         sf_count_t start_frame = sf_seek(sndfile_input, 0, SEEK_SET);
         double *input_buffer = (double *)fftw_malloc(sizeof(double) * 11025);
         sf_count_t frames_requested = sf_readf_double(sndfile_input, input_buffer, frames);
         printf("Frames read: %ld\n", frames_requested);
 
-        // Getting the demodulated buffer
-        // TODO: How would you demod the signal if length less than 11025? pad with 0s ?
+        /* Demodulate 11025hz input frame buffer. */
+        /* TODO: How would you demod the signal if length less than 11025? pad with 0s? */
         double *intermediate_buffer = am_demodulate(input_buffer, 11025, OFF);
 
-        // Write pixel data to image
+        /* Write pixel data to image. */
         for (int i = 0; i < 11024; i++)
         {
             uint32_t pixel_data = intermediate_buffer[i] * 255;
@@ -229,22 +239,26 @@ int create_image_reverse(char *path, char *output_name, int width)
         }
 
         count += frames_requested;
+
+        /* Clean up. */
         free(input_buffer);
         free(intermediate_buffer);
     }
 
     printf("=================\n");
     printf("Finished!\n");
+
+    /* Clean up. */
     sf_close(sndfile_input);
     fclose(image);
+
     return 0;
 }
 
-/*
-Test, takes 1 second of audio and tries to output an image
-use bit masking and bit shifting to get the correct byte.
-BMP is using little endian
-*/
+/* Test function:
+
+   Takes 1 second of audio and outputs an image using bit masking
+   and bit shifting to get the correct byte. BMP is using little endian */
 void create_test_image(double *buffer, int width, int height)
 {
     FILE *image;
@@ -295,7 +309,9 @@ void create_test_image(double *buffer, int width, int height)
     fclose(image);
 }
 
-/* Test to see if I can create a sample bmp image*/
+/* Test function.
+
+   Creates a 500x500 color bmp image. */
 void create_color_test_image()
 {
     char header[54] = {
@@ -397,6 +413,7 @@ void create_color_test_image()
     fclose(image);
 }
 
+/* Writes file header struct to a bmp image file. */
 void write_file_header(FILE *image, BitMapFileHeader *file_header)
 {
     fputc((file_header->signature & 0xFF00) >> (2 * 4), image);
@@ -407,6 +424,7 @@ void write_file_header(FILE *image, BitMapFileHeader *file_header)
     parse_dword(image, file_header->data_offset);
 }
 
+/* Writes info header struct to bmp image file. */
 void write_info_header(FILE *image, BitMapInfoHeader *InfoHeader)
 {
     parse_dword(image, InfoHeader->size);
@@ -424,6 +442,8 @@ void write_info_header(FILE *image, BitMapInfoHeader *InfoHeader)
     parse_dword(image, InfoHeader->important_colors);
 }
 
+/* Writes color table to bmp image file.
+   This is for 8-bit gray scale images. */
 void write_color_table(FILE *image)
 {
     for (int i = 0; i < 256; i++)
@@ -435,12 +455,14 @@ void write_color_table(FILE *image)
     }
 }
 
+/* Parses 2 bytes of data from bmp struct and writes to image file. */
 void parse_word(FILE *image, uint16_t value)
 {
     fputc((value & 0x00FF), image);
     fputc((value & 0xFF00) >> (2 * 4), image);
 }
 
+/* Parses 4 bytes of data from bmp struct and writes to image file. */
 void parse_dword(FILE *image, uint32_t value)
 {
     fputc((value & 0x000000FF), image);

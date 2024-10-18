@@ -218,7 +218,7 @@ int create_audio()
             print = 1;
         }
 
-        /* Demodulated 11025hz input frame buffer. */
+        /* Demodulate 11025hz input frame buffer. */
         double *intermediate_buffer = am_demodulate(input_buffer, 11025, ON);
 
         /* Writing demodulated frame buffer to audio output file. */
