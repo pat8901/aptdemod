@@ -6,7 +6,7 @@ notes.txt
 
 # object files, will change this rule in the future
 src-core/algebra.o
-src-core/apt.o
+src-core/audio.o
 src-core/image.o
 src-core/main.o
 src-core/utils.o
