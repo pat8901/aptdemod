@@ -16,16 +16,15 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef Apt_H
-#define Apt_H
+#ifndef Audio_H
+#define Audio_H
 
 int down_sample(SNDFILE *sndfile, SF_INFO *sfinfo);
-void read_samples(SNDFILE *sndfile, SF_INFO *sfinfo);
+
+int create_audio();
+int create_audio_single(double *buffer);
 
 double *get_4160_sample();
 double *get_11025_sample();
-
-void create_audio_single(double *buffer);
-void create_audio();
 
 #endif
