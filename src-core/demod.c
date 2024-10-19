@@ -24,12 +24,7 @@
 #include <string.h>
 #include "demod.h"
 
-/*
-TODO: get rid of unnecessary file check-in creation
-TODO: would it be possible to load the whole audio file in one
-TODO: What dictates the brightness of my image. How can I make the features brighter?
-
-Amplitude demodulates a finite length frame buffer holding a 11025hz analog signal. */
+/* Amplitude demodulates a finite length frame buffer holding a 11025hz analog signal. */
 double *am_demodulate(double *input_signal, int input_length, int generate_stats)
 {
     /* Initializing input and output buffers. */
@@ -51,8 +46,6 @@ double *am_demodulate(double *input_signal, int input_length, int generate_stats
     fftw_destroy_plan(p);
 
     /* Shifting the 2400hz signal down to 0hz to center the data package.*/
-    /* Optimization: instead of shift the elements, is it possible to set the starting index.
-       A ring buffer may also be a good idea? */
     for (int i = 0; i < 2400; i++)
     {
         double real_temp = out[0][0];
@@ -104,8 +97,6 @@ double *am_demodulate(double *input_signal, int input_length, int generate_stats
     }
 
     /* Normalize output data. I do not remember why 5512.5*/
-    /* Optimization: only normalized the data that matters as from the
-       previous step many indexes were already zeroed out.*/
     for (int i = 0; i < 11025; i++)
     {
         out[i][0] = out[i][0] / 5512.5;
