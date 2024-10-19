@@ -28,15 +28,17 @@
 void menu_about();
 void menu_help();
 void command_verbose();
+void command_generate();
 
 int main(int argc, char *argv[])
 {
 
     static struct option const long_options[] =
         {
-            {"help", no_argument, NULL, 'h'},
             {"verbose", no_argument, NULL, 'v'},
+            {"generate", no_argument, NULL, 'g'},
             {"about", no_argument, NULL, 'a'},
+            {"help", no_argument, NULL, 'h'},
             {NULL, 0, NULL, 0},
         };
 
@@ -44,12 +46,15 @@ int main(int argc, char *argv[])
 
     // 1. Parse args and set args attributes in a struct
     // use "cat" as inspiration
-    while ((opt = getopt_long(argc, argv, "vah", long_options, NULL)) != -1)
+    while ((opt = getopt_long(argc, argv, "vgah", long_options, NULL)) != -1)
     {
         switch (opt)
         {
         case 'v':
             command_verbose();
+            break;
+        case 'g':
+            command_generate();
             break;
         case 'a':
             menu_about();
@@ -94,4 +99,10 @@ void menu_help()
 void command_verbose()
 {
     printf("verbose=1\n");
+}
+
+/* Sets flag to generate reports during program execution.*/
+void command_generate()
+{
+    printf("generate=1\n");
 }

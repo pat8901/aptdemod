@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <fftw3.h>
 #include <math.h>
-#include "algebra.h"
+#include "demod.h"
 #include "utils.h"
 #include "image.h"
 

@@ -22,33 +22,37 @@
 #include <fftw3.h>
 #include <math.h>
 #include <string.h>
-#include "algebra.h"
+#include "demod.h"
 
 /*
-Most up to date function to properly demodulate full APT signals.
 TODO: get rid of unnecessary file check-in creation
 TODO: would it be possible to load the whole audio file in one
 TODO: What dictates the brightness of my image. How can I make the features brighter?
-*/
+
+Amplitude demodulates a finite length frame buffer holding a 11025hz analog signal. */
 double *am_demodulate(double *input_signal, int input_length, int generate_stats)
 {
+    /* Initializing input and output buffers. */
     fftw_complex *buffer = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
     fftw_complex *out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
 
-    /* Placing input signal contents into buffer. Can not use memcopy due to
-    differing value types. Must do it manually */
+    /* Placing input signal samples into input buffer. */
     for (int i = 0; i < 11025; i++)
     {
         buffer[i][0] = (long double)input_signal[i];
         buffer[i][1] = (long double)0;
     }
 
-    /* Preform FFT operations*/
+    /* Preform FFT operations on input frame buffer and place
+       results into output buffer. This transforms the audio signal
+       from the time domain into the frequency domain.*/
     fftw_plan p = fftw_plan_dft_1d(11025, buffer, out, FFTW_FORWARD, FFTW_ESTIMATE);
     fftw_execute(p);
     fftw_destroy_plan(p);
 
-    // Shifting the 2400 signal
+    /* Shifting the 2400hz signal down to 0hz to center the data package.*/
+    /* Optimization: instead of shift the elements, is it possible to set the starting index.
+       A ring buffer may also be a good idea? */
     for (int i = 0; i < 2400; i++)
     {
         double real_temp = out[0][0];
@@ -62,6 +66,8 @@ double *am_demodulate(double *input_signal, int input_length, int generate_stats
         out[11024][1] = imaginary_temp;
     }
 
+    /* If activated, generate a report on the output
+       data after being transformed into the frequency domain.*/
     if (generate_stats == ON)
     {
         FILE *fp2 = fopen("./output/text/11025_am_demod.txt", "w");
@@ -73,7 +79,8 @@ double *am_demodulate(double *input_signal, int input_length, int generate_stats
         fclose(fp2);
     }
 
-    // Apply passband filter
+    /* Apply passband filter to isolate the data package
+       centered on the 0hz frequency. */
     for (int i = 0; i < 11025; i++)
     {
         if (i > 2080 && i < 8944)
@@ -83,6 +90,8 @@ double *am_demodulate(double *input_signal, int input_length, int generate_stats
         }
     }
 
+    /* If activated, generate a report on the ouput data after
+       the data package has been isolated.*/
     if (generate_stats == ON)
     {
         FILE *fp3 = fopen("./output/text/11025_filter_am_demod.txt", "w");
@@ -94,14 +103,17 @@ double *am_demodulate(double *input_signal, int input_length, int generate_stats
         fclose(fp3);
     }
 
-    // Normalize
+    /* Normalize output data. I do not remember why 5512.5*/
+    /* Optimization: only normalized the data that matters as from the
+       previous step many indexes were already zeroed out.*/
     for (int i = 0; i < 11025; i++)
     {
         out[i][0] = out[i][0] / 5512.5;
         out[i][1] = out[i][1] / 5512.5;
     }
 
-    // Preform the inverse fft
+    /* Preform the inverse fft on the ouput buffer to transform
+       it back into the time domain. */
     fftw_complex *new_real_signal = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
     fftw_complex *new_buffer = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
     for (int i = 0; i < 11025; i++)
@@ -113,6 +125,8 @@ double *am_demodulate(double *input_signal, int input_length, int generate_stats
     fftw_execute(inverse_plan);
     fftw_destroy_plan(inverse_plan);
 
+    /* If activated, generate a report on the output data after it was
+       transformed back into the time domain. */
     if (generate_stats == ON)
     {
         FILE *fp4 = fopen("./output/text/11025_real_am_demod.txt", "w");
@@ -124,7 +138,8 @@ double *am_demodulate(double *input_signal, int input_length, int generate_stats
         fclose(fp4);
     }
 
-    // Magnitude calculation
+    /* Calculate the magnitude between our two analog signals in the time domain.
+       Getting the magnitude effectively amplitude demodulates out signal. */
     double *result = (double *)malloc(sizeof(double) * 11025);
     for (int i = 0; i < 11025; i++)
     {
@@ -135,6 +150,8 @@ double *am_demodulate(double *input_signal, int input_length, int generate_stats
         result[i] = magnitude;
     }
 
+    /* If activated, generate a report on the final results showing
+       magnitude calculations from our result buffer.*/
     if (generate_stats == ON)
     {
         FILE *fp5 = fopen("./output/text/11025_mag_am_demod.txt", "w");
@@ -146,7 +163,7 @@ double *am_demodulate(double *input_signal, int input_length, int generate_stats
         fclose(fp5);
     }
 
-    // Clean up
+    /* Clean up. */
     free(buffer);
     free(out);
     free(new_buffer);
@@ -155,74 +172,7 @@ double *am_demodulate(double *input_signal, int input_length, int generate_stats
     return result;
 }
 
-/*
-Deprecated. This function passband filters a second of APT data,
-resulting in isolating 2400 Hz signal.
-*/
-fftw_complex *am_demod_single_11025(double *input_signal, int input_length)
-{
-    fftw_complex *buffer = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
-    fftw_complex *out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
-
-    /* Placing input signal contents into buffer. Can not use memcopy due to
-    differing value types. Must do it manually */
-    for (int i = 0; i < 11025; i++)
-    {
-        buffer[i][0] = (long double)input_signal[i];
-        buffer[i][1] = (long double)0;
-    }
-
-    /* Preform FFT operations*/
-    fftw_plan p = fftw_plan_dft_1d(11025, buffer, out, FFTW_FORWARD, FFTW_ESTIMATE);
-    fftw_execute(p);
-    fftw_destroy_plan(p);
-
-    // Setting negative frequencies to 0.
-    for (int i = 5513; i < 11025; i++)
-    {
-        out[i][0] = (long double)0;
-        out[i][1] = (long double)0;
-    }
-
-    // Removing the 0 frequency
-    out[0][0] = 0;
-    out[0][1] = 0;
-
-    // Apply passband filter
-    passband_filter(out, 2300, 2500);
-
-    FILE *fp2 = fopen("./output/text/11025_frequency_filter.txt", "w");
-    fprintf(fp2, "Real,Imaginary\n");
-    for (int i = 0; i < 11025; i++)
-    {
-        fprintf(fp2, "%f, %f\n", out[i][0], out[i][1]);
-    }
-    fclose(fp2);
-
-    // preform the inverse fft
-    fftw_complex *new_real_signal = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
-    fftw_complex *new_buffer = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
-    for (int i = 0; i < 11025; i++)
-    {
-        new_buffer[i][0] = out[i][0];
-        new_buffer[i][1] = out[i][1];
-    }
-    fftw_plan inverse_plan = fftw_plan_dft_1d(11025, new_buffer, new_real_signal, FFTW_BACKWARD, FFTW_ESTIMATE);
-    FILE *fp3 = fopen("./output/text/11025_real_signal.txt", "w");
-    fftw_execute(inverse_plan);
-
-    fprintf(fp3, "Real,Imaginary\n");
-    for (int i = 0; i < 11025; i++)
-    {
-        fprintf(fp3, "%f, %f\n", new_real_signal[i][0], new_real_signal[i][1]);
-    }
-    fclose(fp3);
-    fftw_destroy_plan(inverse_plan);
-
-    return new_real_signal;
-}
-
-// Takes in a complex signal and applies a passband fillter to get 2400Hz
+/* Takes in a complex signal and applies a passband fillter to get 2400Hz */
 void passband_filter(fftw_complex *signal, int from, int to)
 {
     for (int i = 0; i < 5513; i++)
@@ -235,21 +185,89 @@ void passband_filter(fftw_complex *signal, int from, int to)
     }
 }
 
-// https://www.cuemath.com/linear-interpolation-formula/
-float linear_interpolate(sf_count_t x_0, sf_count_t x_1, float x, float y_0, float y_1)
+/* DEPRECATED: Amplitude demodulates a single finite length frame
+   buffer holding a 11025hz analog signal.*/
+fftw_complex *am_demod_single_11025(double *input_signal, int input_length, int generate_stats)
 {
-    float y = y_0 + ((x - x_0) * ((y_1 - y_0) / (x_1 - x_0)));
-    return y;
+    /* Initializing input and output buffers. */
+    fftw_complex *buffer = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
+    fftw_complex *out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
+
+    /* Placing input signal samples into input buffer. */
+    for (int i = 0; i < 11025; i++)
+    {
+        buffer[i][0] = (long double)input_signal[i];
+        buffer[i][1] = (long double)0;
+    }
+
+    /* Preform FFT operations on input frame buffer and place
+       results into output buffer. This transforms the audio signal
+       from the time domain into the frequency domain.*/
+    fftw_plan p = fftw_plan_dft_1d(11025, buffer, out, FFTW_FORWARD, FFTW_ESTIMATE);
+    fftw_execute(p);
+    fftw_destroy_plan(p);
+
+    /* Removing negative frequencies. */
+    for (int i = 5513; i < 11025; i++)
+    {
+        out[i][0] = (long double)0;
+        out[i][1] = (long double)0;
+    }
+
+    /* Removing the 0 frequency. */
+    out[0][0] = 0;
+    out[0][1] = 0;
+
+    /* Apply passband filter to isolate the data package
+       centered on the 0hz frequency. */
+    passband_filter(out, 2300, 2500);
+
+    if (generate_stats == ON)
+    {
+        FILE *fp2 = fopen("./output/text/11025_frequency_filter.txt", "w");
+        fprintf(fp2, "Real,Imaginary\n");
+        for (int i = 0; i < 11025; i++)
+        {
+            fprintf(fp2, "%f, %f\n", out[i][0], out[i][1]);
+        }
+        fclose(fp2);
+    }
+
+    /* Preform the inverse fft on the ouput buffer to transform
+       it back into the time domain. */
+    fftw_complex *new_real_signal = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
+    fftw_complex *new_buffer = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
+    for (int i = 0; i < 11025; i++)
+    {
+        new_buffer[i][0] = out[i][0];
+        new_buffer[i][1] = out[i][1];
+    }
+    fftw_plan inverse_plan = fftw_plan_dft_1d(11025, new_buffer, new_real_signal, FFTW_BACKWARD, FFTW_ESTIMATE);
+    fftw_execute(inverse_plan);
+    fftw_destroy_plan(inverse_plan);
+
+    if (generate_stats == ON)
+    {
+        FILE *fp3 = fopen("./output/text/11025_real_signal.txt", "w");
+        fprintf(fp3, "Real,Imaginary\n");
+        for (int i = 0; i < 11025; i++)
+        {
+            fprintf(fp3, "%f, %f\n", new_real_signal[i][0], new_real_signal[i][1]);
+        }
+        fclose(fp3);
+    }
+
+    return new_real_signal;
 }
 
+/* TBD: Amplitude demodulates an APT signal in real time. */
 void finite_impulse_response()
 {
 }
 
-/* Deprecated, may use this function in demodulation process to containerize work
+/* TBD: May use this function in demodulation process to containerize work.
 https://www.fftw.org/fftw3_doc/Complex-One_002dDimensional-DFTs.html
-https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm
-*/
+https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm */
 void fast_fourier_transform(double *input_signal, int input_length)
 {
 }
