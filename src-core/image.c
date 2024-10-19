@@ -80,11 +80,9 @@ int create_image(int width)
     };
     BitMapInfoHeader *InfoHeader_ptr = &InfoHeader;
 
-    /* Write bmp file header to image. */
+    /* Write bmp headers to the image. */
     write_file_header(image, header_ptr);
-    /* Write bmp info header to image. */
     write_info_header(image, InfoHeader_ptr);
-    /* Write bmp color table to image. */
     write_color_table(image);
 
     /* Get frame buffers of demodulated APT audio and write to image. */
@@ -180,11 +178,9 @@ int create_image_reverse(char *path, char *output_name, int width)
     };
     BitMapInfoHeader *InfoHeader_ptr = &InfoHeader;
 
-    /* Write bmp file header to image. */
+    /* Write bmp headers to the image. */
     write_file_header(image, header_ptr);
-    /* Write bmp info header to image */
     write_info_header(image, InfoHeader_ptr);
-    /* Write bmp color table to image. */
     write_color_table(image);
 
     /* Get frame buffers of demodulated APT audio and write to image. */
