@@ -21,8 +21,9 @@
 #ifndef Utils_H
 #define Utils_H
 
+float linear_interpolate(sf_count_t x_0, sf_count_t x_1, float x, float y_0, float y_1);
 void get_path();
 void print_buffer_double(double *buffer, int length);
-void memory_copy_practice();
+int memory_copy_practice();
 
 #endif

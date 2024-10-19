@@ -26,7 +26,7 @@
 #include <linux/limits.h>
 #include <fftw3.h>
 #include "audio.h"
-#include "algebra.h"
+#include "demod.h"
 #include "utils.h"
 #include "image.h"
 
