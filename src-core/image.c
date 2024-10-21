@@ -127,8 +127,19 @@ int create_image(int width)
    This is necessary for bmp files. Can only handle 11025Hz audio files.
 
    int width - The amount of pixels for the output image*/
-int create_image_reverse(char *path, char *output_name, int width)
+int create_image_reverse(OptionFlags *ptr_flags, char *path, char *output_name, int width)
 {
+
+    /* Analyze flags to set options for program execution. */
+    if (ptr_flags->generate_flag == true)
+    {
+        printf("generate=1\n");
+    }
+    if (ptr_flags->verbose_flag == true)
+    {
+        printf("verbose=1\n");
+    }
+
     /* Initialize 11025hz audio input file. */
     SF_INFO sfinfo_input;
     SNDFILE *sndfile_input;
