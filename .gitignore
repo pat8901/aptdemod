@@ -12,5 +12,6 @@ src-core/main.o
 src-core/utils.o
 
 # Output files
+output/audio/*
 output/images/*
 output/text/*
