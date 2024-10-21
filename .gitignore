@@ -10,3 +10,7 @@ src-core/audio.o
 src-core/image.o
 src-core/main.o
 src-core/utils.o
+
+# Output files
+output/images/*
+output/text/*
