@@ -23,7 +23,7 @@ In the future this will change, but in the mean time we recommend using Debian b
 <summary>Install Dependencies - Debian, Ubuntu, and other Debian-based distros</summary>
 
 ```bash
-sudo apt install git build-essential libfftw3-dev libsndfile1-dev
+sudo apt install git cmake build-essential libfftw3-dev libsndfile1-dev
 ```
 
 </details>

@@ -17,6 +17,7 @@
 */
 
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -32,6 +33,9 @@ void command_generate();
 
 int main(int argc, char *argv[])
 {
+
+    OptionFlags flags = {.verbose_flag = false, .generate_flag = false};
+    OptionFlags *ptr_flags = &flags;
 
     static struct option const long_options[] =
         {
@@ -51,10 +55,14 @@ int main(int argc, char *argv[])
         switch (opt)
         {
         case 'v':
-            command_verbose();
+            printf("set verbose flag to true\n");
+            ;
+            flags.verbose_flag = true;
             break;
         case 'g':
-            command_generate();
+            printf("set generate flag to true\n");
+            ;
+            flags.generate_flag = true;
             break;
         case 'a':
             menu_about();
@@ -71,6 +79,7 @@ int main(int argc, char *argv[])
     // 2. Analyze arg struct
 
     // 3. Run program with given args
+    create_image_reverse(ptr_flags, "./documentation/samples/audio/20210720111842.wav", "output/images/apt_image_reverse_1.bmp", 5512);
 
     /*
     // Create demodulated audio file
@@ -78,10 +87,8 @@ int main(int argc, char *argv[])
 
     // Create weather satellite image from APT signal
     create_image(5512);
-
-    create_image_reverse("./documentation/samples/audio/20210720111842.wav", "output/images/apt_image_reverse_1.bmp", 5512);
-    create_image_reverse("documentation/samples/audio/NOAA1920190808-070600.wav", "output/images/apt_image_reverse_2.bmp", 5512);
     */
+    // create_image_reverse("documentation/samples/audio/NOAA1920190808-070600.wav", "output/images/apt_image_reverse_2.bmp", 5512);
 
     return 0;
 }
@@ -93,7 +100,15 @@ void menu_about()
 
 void menu_help()
 {
-    printf("*** Help Menu ***\n");
+    printf("Usage: noaa-apt [OPTION] [FILE]\n");
+    printf("Amplitude demodulates audio files into weather satellite images.\n\n");
+
+    printf("%-15s   %s\n", "-h, --help", "Displays help menu, providing usage and miscellaneous information.");
+    printf("%-15s   %s\n", "-a, --about", "Displays details about the program, including license information.");
+    printf("%-15s   %s\n", "-v, --verbose", "Provide additional program information as it runs.");
+    printf("%-15s   %s\n", "-f [FILE], --file [FILE]", "This option is followed by a file path argument which tells the program what audio file to process.\n");
+
+    printf("%s\n    %s\n", "Example:", "noaa-apt -v -f /path/to/audio/file/audio.wav");
 }
 
 void command_verbose()
