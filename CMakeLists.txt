@@ -33,7 +33,7 @@ endif()
 # find_package(FFTW REQUIRED)
 
 # Setting local source files
-set(EXE_C_SOURCE_FILES "src-core/main.c" "src-core/audio.c" "src-core/demod.c" "src-core/utils.c" "src-core/image.c")
+set(EXE_C_SOURCE_FILES src-core/main.c src-core/audio.c src-core/demod.c src-core/utils.c src-core/image.c)
 
 # Setting external libs include directories. This may not be necessary
 set(SNDFILE_INCLUDE_DIR /usr/include)
