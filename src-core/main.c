@@ -22,9 +22,10 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <sndfile.h>
+#include <getopt.h>
 #include "audio.h"
 #include "image.h"
-#include <getopt.h>
+#include "utils.h"
 
 void menu_about();
 void menu_help();
@@ -100,7 +101,7 @@ void menu_about()
 
 void menu_help()
 {
-    printf("Usage: noaa-apt [OPTION] [FILE]\n");
+    printf("Usage: aptdemod [OPTION] [FILE]\n");
     printf("Amplitude demodulates audio files into weather satellite images.\n\n");
 
     printf("%-15s   %s\n", "-h, --help", "Displays help menu, providing usage and miscellaneous information.");
@@ -108,7 +109,7 @@ void menu_help()
     printf("%-15s   %s\n", "-v, --verbose", "Provide additional program information as it runs.");
     printf("%-15s   %s\n", "-f [FILE], --file [FILE]", "This option is followed by a file path argument which tells the program what audio file to process.\n");
 
-    printf("%s\n    %s\n", "Example:", "noaa-apt -v -f /path/to/audio/file/audio.wav");
+    printf("%s\n    %s\n", "Example:", "aptdemod -v -f /path/to/audio/file/audio.wav");
 }
 
 void command_verbose()

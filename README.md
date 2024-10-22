@@ -1,9 +1,6 @@
-# NOAA APT Signal Decoder
+# Aptdemod
 
 This C program demodulates Automatic Picture Transmission (APT) radio signals from NOAA satellites, converting the received signals into weather images. By processing the APT signals, the program extracts and reconstructs the image data, providing weather visualizations from satellite transmissions. Ideal for amateur radio enthusiasts and weather monitoring applications, this decoder leverages signal processing techniques to deliver accurate and detailed images.
-
-# Introduction
-This program was developed for Linux.
 
 ### What is APT
 The Automatic Picture Transmission (APT) system is an analog image transmission system developed for use on weather satellites. It was introduced in the 1960s. A user station anywhere in the world can receive local data at least twice a day from each satellite as it passes nearly overhead.
@@ -11,9 +8,10 @@ The Automatic Picture Transmission (APT) system is an analog image transmission 
 For more details, please see the [additional information](https://en.wikipedia.org/wiki/Automatic_picture_transmission).
 
 # Building / Installing
+This program was developed for Linux. Additional platform compatibility will be implemented in future updates.
 
-<h2 style="border-bottom: none;">Linux</h2>
-Noaa-apt has only been tested on Debian based distros.
+## Linux
+Aptdemod has only been tested on Debian based distros.
 In the future this will change, but in the mean time we recommend using Debian based distros. 
 
 ### Dependencies
@@ -55,24 +53,24 @@ sudo apt install git cmake build-essential libfftw3-dev libsndfile1-dev
 
 </details>
 
-### Build noaa-apt
+### Build aptdemod
 ```bash
-# Clone noaa-apt repo
-git clone https://github.com/pat8901/noaa-apt.git
-cd noaa-apt
+# Clone aptdemod repo
+git clone https://github.com/pat8901/aptdemod.git
+cd aptdemod/build
 
-# Build noaa-apt
-make
+# Build aptdemod
+cmake ../
 
 # Run
-./noaa-apt
+./aptdemod
 ```
 
 # Quick Start
 
 ### Usage
 ```bash
-noaa-apt [options] [arguments]
+aptdemod [options] [arguments]
 ```
 
 ### Available Options/Arguments
@@ -85,5 +83,5 @@ noaa-apt [options] [arguments]
 
 ### Sample command
 ```bash
-noaa-apt -v -f /path/to/audio/file/audio.wav
+aptdemod -v -f /path/to/audio/file/audio.wav
 ```

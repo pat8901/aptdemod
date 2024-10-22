@@ -1,3 +1,7 @@
+# *** Deprecated *** 
+# This file is longer used. Please use CMakeLists.txt instead. 
+# This file is here only for reference. It will be removed in a future pr.
+
 BUILD_DIR = build
 CC = gcc
 
