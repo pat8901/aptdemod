@@ -25,6 +25,7 @@
 #include <sndfile.h>
 #include <linux/limits.h>
 #include <fftw3.h>
+#include <stdlib.h>
 #include "audio.h"
 #include "demod.h"
 #include "utils.h"

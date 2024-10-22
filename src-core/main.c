@@ -22,9 +22,10 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <sndfile.h>
+#include <getopt.h>
 #include "audio.h"
 #include "image.h"
-#include <getopt.h>
+#include "utils.h"
 
 void menu_about();
 void menu_help();

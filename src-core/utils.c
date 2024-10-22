@@ -20,6 +20,8 @@
 #include <string.h>
 #include <linux/limits.h>
 #include <sndfile.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 // https://www.cuemath.com/linear-interpolation-formula/
 float linear_interpolate(sf_count_t x_0, sf_count_t x_1, float x, float y_0, float y_1)
@@ -28,7 +30,7 @@ float linear_interpolate(sf_count_t x_0, sf_count_t x_1, float x, float y_0, flo
     return y;
 }
 
-/* Returns the current path from which this function is called. */
+/* Returns the current path from where the user is currently located in the directories. */
 void get_path()
 {
     char cwd[PATH_MAX];
