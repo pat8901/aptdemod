@@ -90,11 +90,11 @@ int create_image(int width)
     {
         /* Seek to the requested 11025hz frame and
            read a selected amount of samples into a frame buffer. */
-        printf("count: %d\n", count);
+        printf("\rcount: %ld\n", count);
         sf_count_t start_frame = sf_seek(sndfile_input, count, SEEK_SET);
         double *input_buffer = (double *)fftw_malloc(sizeof(double) * 11025);
         sf_count_t frames_requested = sf_readf_double(sndfile_input, input_buffer, 11025);
-        printf("Frames read: %ld\n", frames_requested);
+        printf("\rFrames read: %ld", frames_requested);
 
         /* Demodulate 11025hz input frame buffer. */
         double *intermediate_buffer = am_demodulate(input_buffer, 11025, ON);
@@ -113,7 +113,7 @@ int create_image(int width)
         free(intermediate_buffer);
     }
 
-    printf("=================\n");
+    printf("\n=================\n");
     printf("Finished!\n");
 
     /* Clean up. */
@@ -200,11 +200,10 @@ int create_image_reverse(OptionFlags *ptr_flags, char *path, char *output_name, 
         /* Seek to the requested 11025hz frame and
            read a selected amount of samples into a frame buffer. */
         frames -= 11025;
-        printf("frames remaining: %ld\n", frames);
         sf_count_t start_frame = sf_seek(sndfile_input, frames, SEEK_SET);
         double *input_buffer = (double *)fftw_malloc(sizeof(double) * 11025);
         sf_count_t frames_requested = sf_readf_double(sndfile_input, input_buffer, 11025);
-        printf("Frames read: %ld\n", frames_requested);
+        printf("\rframes remaining=%ld  Frames read=%ld", frames, frames_requested);
 
         /* Demodulate 11025hz input frame buffer. */
         double *intermediate_buffer = am_demodulate(input_buffer, 11025, OFF);
@@ -224,7 +223,7 @@ int create_image_reverse(OptionFlags *ptr_flags, char *path, char *output_name, 
     }
 
     /* Processing the remaining frames less than 11025, if they exist. */
-    printf("Frames remaining: %ld\n", frames);
+    printf("\nFrames remaining: %ld\n", frames);
     if (frames != 0)
     {
         /* Seek to the requested 11025hz frame and
