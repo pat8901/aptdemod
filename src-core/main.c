@@ -29,17 +29,18 @@
 
 void menu_about();
 void menu_help();
-void command_verbose();
-void command_generate();
 
 int main(int argc, char *argv[])
 {
 
-    OptionFlags flags = {.verbose_flag = false, .generate_flag = false};
+    OptionFlags flags = {.file_flag = false, .verbose_flag = false, .generate_flag = false};
     OptionFlags *ptr_flags = &flags;
+    const char *audio_path[256];
+    int opt;
 
     static struct option const long_options[] =
         {
+            {"file", required_argument, NULL, 'f'},
             {"verbose", no_argument, NULL, 'v'},
             {"generate", no_argument, NULL, 'g'},
             {"about", no_argument, NULL, 'a'},
@@ -47,22 +48,22 @@ int main(int argc, char *argv[])
             {NULL, 0, NULL, 0},
         };
 
-    int opt = 0;
-
-    // 1. Parse args and set args attributes in a struct
-    // use "cat" as inspiration
-    while ((opt = getopt_long(argc, argv, "vgah", long_options, NULL)) != -1)
+    /* Parse args and set args attributes in a struct. */
+    while ((opt = getopt_long(argc, argv, "f:vgah", long_options, NULL)) != -1)
     {
         switch (opt)
         {
+        case 'f':
+            flags.file_flag = true;
+            strncpy(audio_path, optarg, 256);
+            printf("file path=\"%s\"\n", audio_path);
+            break;
         case 'v':
             printf("set verbose flag to true\n");
-            ;
             flags.verbose_flag = true;
             break;
         case 'g':
             printf("set generate flag to true\n");
-            ;
             flags.generate_flag = true;
             break;
         case 'a':
@@ -77,21 +78,18 @@ int main(int argc, char *argv[])
         }
     }
 
-    // 2. Analyze arg struct
+    /* Analyze option and argument logic. */
+    if (!flags.file_flag)
+    {
+        printf("Please supply a file using -f, --file\n");
+        return EXIT_FAILURE;
+    }
 
-    // 3. Run program with given args
-    create_image_reverse(ptr_flags, "./documentation/samples/audio/20210720111842.wav", "output/images/apt_image_reverse_1.bmp", 5512);
+    /* Run program with given args. */
+    // TODO: need to set output directory properly, to avoid seg fault.
+    create_image_reverse(ptr_flags, audio_path, "./apt_image_reverse_1.bmp", 5512);
 
-    /*
-    // Create demodulated audio file
-    create_audio();
-
-    // Create weather satellite image from APT signal
-    create_image(5512);
-    */
-    // create_image_reverse("documentation/samples/audio/NOAA1920190808-070600.wav", "output/images/apt_image_reverse_2.bmp", 5512);
-
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void menu_about()
@@ -110,15 +108,4 @@ void menu_help()
     printf("%-15s   %s\n", "-f [FILE], --file [FILE]", "This option is followed by a file path argument which tells the program what audio file to process.\n");
 
     printf("%s\n    %s\n", "Example:", "aptdemod -v -f /path/to/audio/file/audio.wav");
-}
-
-void command_verbose()
-{
-    printf("verbose=1\n");
-}
-
-/* Sets flag to generate reports during program execution.*/
-void command_generate()
-{
-    printf("generate=1\n");
 }
