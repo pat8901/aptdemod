@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <sndfile.h>
 #include <stdlib.h>
+#include <string.h>
 #include <fftw3.h>
 #include <math.h>
 #include "demod.h"
@@ -127,10 +128,9 @@ int create_image(int width)
    This is necessary for bmp files. Can only handle 11025Hz audio files.
 
    int width - The amount of pixels for the output image*/
-int create_image_reverse(OptionFlags *ptr_flags, char *path, char *output_name, int width)
+int create_image_reverse(OptionFlags *ptr_flags, const char *audio_path[], char *output_path, int width)
 {
-
-    /* Analyze flags to set options for program execution. */
+    /* Analyze option flags to set options for program execution. */
     if (ptr_flags->generate_flag == true)
     {
         printf("generate=1\n");
@@ -147,12 +147,11 @@ int create_image_reverse(OptionFlags *ptr_flags, char *path, char *output_name, 
     sf_count_t count = 0;
 
     /* Open 11025hz input audio file for reading. */
-    const char *file_path = path;
-    sndfile_input = sf_open(file_path, SFM_READ, &sfinfo_input);
+    sndfile_input = sf_open(audio_path, SFM_READ, &sfinfo_input);
     if (!sndfile_input)
     {
         printf("Failed to open file: %s\n", sf_strerror(NULL));
-        return -1;
+        return EXIT_FAILURE;
     }
 
     /* Calculates the height of the output image given
@@ -162,7 +161,7 @@ int create_image_reverse(OptionFlags *ptr_flags, char *path, char *output_name, 
 
     /* Initialize and open bmp image file. */
     FILE *image;
-    image = fopen(output_name, "w+");
+    image = fopen(output_path, "w+");
 
     /* Build bmp file header. */
     BitMapFileHeader header = {
