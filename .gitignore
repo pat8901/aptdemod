@@ -1,5 +1,6 @@
 .vscode
 /build
+/extra
 src-plot/.venv
 src-plot/__pycache__
 notes.txt

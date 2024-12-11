@@ -2,7 +2,9 @@
 
 ![Img](argentina.png)
 
-This C program demodulates Automatic Picture Transmission (APT) radio signals from NOAA satellites, converting the received signals into weather images. By processing the APT signals, the program extracts and reconstructs the image data, providing weather visualizations from satellite transmissions. Ideal for amateur radio enthusiasts and weather monitoring applications, this decoder leverages signal processing techniques to deliver accurate and detailed images.
+Aptdemod is a C program designed to demodulate Automatic Picture Transmission (APT) radio signals from NOAA satellites stored in 11025hz wav audio files. By processing the APT signals, the program extracts and reconstructs the image data outputting a weather satellite image. This provides weather visualizations from satellite transmissions. Ideal for amateur radio enthusiasts and weather monitoring applications, this decoder leverages signal processing techniques to deliver accurate and detailed images.
+
+* Aptdemod audio input is limited to 11025hz wav files. Further compatibility is planned in future updates!
 
 ### What is APT
 The Automatic Picture Transmission (APT) system is an analog image transmission system developed for use on weather satellites. It was introduced in the 1960s. A user station anywhere in the world can receive local data at least twice a day from each satellite as it passes nearly overhead.
@@ -63,14 +65,21 @@ sudo apt install git cmake build-essential libfftw3-dev libsndfile1-dev
 git clone https://github.com/pat8901/aptdemod.git
 cd aptdemod/build
 
-# Build aptdemod
+# Generate makefile
 cmake ../
+
+# Build aptdemod
+make
 
 # Run
 ./aptdemod
 ```
 
 # Quick Start
+* There are a few audio samples that can be used when testing the program for the first time. These can be found in the cloned repo under "aptdemod/documentation/samples/audio". 
+* When running the program just pass the file path for one of the samples as an argument.
+
+* Aptdemod will output a bmp image in the same directory from which the program is called.
 
 ### Usage
 ```bash
@@ -87,5 +96,5 @@ aptdemod [options] [arguments]
 
 ### Sample command
 ```bash
-aptdemod -v -f /path/to/audio/file/audio.wav
+$ ./aptdemod -f /path/to/audio/file/audio.wav
 ```

@@ -202,7 +202,7 @@ int create_image_reverse(OptionFlags *ptr_flags, const char *audio_path[], char 
         sf_count_t start_frame = sf_seek(sndfile_input, frames, SEEK_SET);
         double *input_buffer = (double *)fftw_malloc(sizeof(double) * 11025);
         sf_count_t frames_requested = sf_readf_double(sndfile_input, input_buffer, 11025);
-        printf("\rframes remaining=%ld  Frames read=%ld", frames, frames_requested);
+        printf("frames remaining=%ld  Frames read=%ld\n", frames, frames_requested);
 
         /* Demodulate 11025hz input frame buffer. */
         double *intermediate_buffer = am_demodulate(input_buffer, 11025, OFF);
@@ -222,7 +222,7 @@ int create_image_reverse(OptionFlags *ptr_flags, const char *audio_path[], char 
     }
 
     /* Processing the remaining frames less than 11025, if they exist. */
-    printf("\nFrames remaining: %ld\n", frames);
+    printf("Frames remaining: %ld\n", frames);
     if (frames != 0)
     {
         /* Seek to the requested 11025hz frame and
