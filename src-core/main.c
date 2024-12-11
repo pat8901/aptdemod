@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 
     /* Run program with given args. */
     // TODO: need to set output directory properly, to avoid seg fault.
-    create_image_reverse(ptr_flags, audio_path, "./apt_image_reverse_1.bmp", 5512);
+    create_image_reverse(ptr_flags, audio_path, "./apt_image.bmp", 5512);
 
     return EXIT_SUCCESS;
 }
@@ -107,5 +107,5 @@ void menu_help()
     printf("%-15s   %s\n", "-v, --verbose", "Provide additional program information as it runs.");
     printf("%-15s   %s\n", "-f [FILE], --file [FILE]", "This option is followed by a file path argument which tells the program what audio file to process.\n");
 
-    printf("%s\n    %s\n", "Example:", "aptdemod -v -f /path/to/audio/file/audio.wav");
+    printf("%s\n    %s\n", "Example:", "aptdemod -f /path/to/audio/file/audio.wav");
 }
