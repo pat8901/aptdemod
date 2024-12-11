@@ -96,5 +96,5 @@ aptdemod [options] [arguments]
 
 ### Sample command
 ```bash
-$ ./aptdemod -f /path/to/audio/file/audio.wav
+./aptdemod -f /path/to/audio/file/audio.wav
 ```
