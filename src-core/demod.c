@@ -46,17 +46,25 @@ double *am_demodulate(double *input_signal, int input_length, int generate_stats
     fftw_destroy_plan(p);
 
     /* Shifting the 2400hz signal down to 0hz to center the data package.*/
+    fftw_complex *shifted = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
+    int size = 11025;
+    int offset = size - 2400;
+    for (int i = size - offset; i < 11025; i++)
+    {
+        shifted[i - (size - offset)][0] = out[i][0];
+        shifted[i - (size - offset)][1] = out[i][1];
+    }
+
     for (int i = 0; i < 2400; i++)
     {
-        double real_temp = out[0][0];
-        double imaginary_temp = out[0][1];
-        for (int j = 1; j < 11025; j++)
-        {
-            out[j - 1][0] = out[j][0];
-            out[j - 1][1] = out[j][1];
-        }
-        out[11024][0] = real_temp;
-        out[11024][1] = imaginary_temp;
+        shifted[i + offset][0] = out[i][0];
+        shifted[i + offset][1] = out[i][1];
+    }
+
+    for (int i = 0; i < 11025; i++)
+    {
+        out[i][0] = shifted[i][0];
+        out[i][1] = shifted[i][1];
     }
 
     /* If activated, generate a report on the output
@@ -157,6 +165,7 @@ double *am_demodulate(double *input_signal, int input_length, int generate_stats
     /* Clean up. */
     free(buffer);
     free(out);
+    free(shifted);
     free(new_buffer);
     free(new_real_signal);
 
