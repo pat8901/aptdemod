@@ -98,3 +98,6 @@ aptdemod [options] [arguments]
 ```bash
 ./aptdemod -f /path/to/audio/file/audio.wav
 ```
+
+# How to Profile Program
+* ``gprof`` is used to profile this program
