@@ -1,5 +1,4 @@
 .vscode
-/build
 /profile
 /extra
 src-plot/.venv

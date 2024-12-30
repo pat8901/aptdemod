@@ -1,7 +1,14 @@
 cmake_minimum_required(VERSION 3.22)
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_DEBUG_FLAGS "${CMAKE_C_DEBUG_FLAGS} -Wall -Wextra -pg")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -o3")
+
+if(NOT CMAKE_BUILD_TYPE)
+    message(STATUS "Setting build type to Release as none was specified.")
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the build type: Debug, Release" FORCE)
+endif()
+
+# Build flags
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_DEBUG_FLAGS} -g -O0 -Wall -Wextra -fsanitize=address -fsanitize=undefined -pg")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} -O3 -s")
 
 # Setting project name
 project(aptdemod)
