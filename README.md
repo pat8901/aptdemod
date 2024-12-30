@@ -2,9 +2,10 @@
 
 ![Img](argentina.png)
 
+`Aptdemod audio input is limited to 11025hz wav files. Further compatibility is planned in future updates!`
+
 Aptdemod is a C program designed to demodulate Automatic Picture Transmission (APT) radio signals from NOAA satellites stored in 11025hz wav audio files. By processing the APT signals, the program extracts and reconstructs the image data outputting a weather satellite image. This provides weather visualizations from satellite transmissions. Ideal for amateur radio enthusiasts and weather monitoring applications, this decoder leverages signal processing techniques to deliver accurate and detailed images.
 
-* Aptdemod audio input is limited to 11025hz wav files. Further compatibility is planned in future updates!
 
 ### What is APT
 The Automatic Picture Transmission (APT) protocol is an analog image transmission system developed for use on weather satellites. It was introduced in the 1960s. A user station anywhere in the world can receive local data at least twice a day from each satellite as it passes nearly overhead.
@@ -22,7 +23,6 @@ In the future this will change, but in the mean time we recommend using Debian b
 
 ### Dependencies
 
-<details>
 
 <summary>Install Dependencies - Debian, Ubuntu, and other Debian-based distros</summary>
 
@@ -30,49 +30,45 @@ In the future this will change, but in the mean time we recommend using Debian b
 sudo apt install git cmake build-essential libfftw3-dev libsndfile1-dev
 ```
 
-</details>
-<details>
+### Building aptdemod
+There are two predefined build types you can use, "Debug" and "Release". "Release" is the default if a build type is not selected when using `-DCMAKE_BUILD_TYPE=build_type` .
 
-<summary>Install Dependencies - Red-Hat-based systems</summary>
+<summary>Release Build</summary>
 
-```bash
-# TBA
-```
-
-</details>
-<details>
-
-<summary>Install Dependencies - Arch-based systems</summary>
-
-```bash
-# TBA
-```
-
-</details>
-<details>
-
-<summary>Install Dependencies - Gentoo</summary>
-
-```bash
-# TBA
-```
-
-</details>
-
-### Build aptdemod
 ```bash
 # Clone aptdemod repo
 git clone https://github.com/pat8901/aptdemod.git
-cd aptdemod/build
 
-# Generate makefile
-cmake ../
+# Navigate to build directory
+cd aptdemod/build/aptdemod-release
+
+# Generate makefile with selected build type
+cmake -DCMAKE_BUILD_TYPE=Release ../../
 
 # Build aptdemod
 make
 
 # Run
-./aptdemod
+./aptdemod -f /path/to/audio.wav
+```
+
+<summary>Debug Build</summary>
+
+```bash
+# Clone aptdemod repo
+git clone https://github.com/pat8901/aptdemod.git
+
+# Navigate to build directory
+cd aptdemod/build/aptdemod-debug
+
+# Generate makefile with selected build type
+cmake -DCMAKE_BUILD_TYPE=Debug ../../
+
+# Build aptdemod
+make
+
+# Run
+./aptdemod -f /path/to/audio.wav
 ```
 
 # Quick Start
@@ -100,4 +96,4 @@ aptdemod [options] [arguments]
 ```
 
 # How to Profile Program
-* ``gprof`` is used to profile this program
+``gprof`` can be used to profile the debug build. For more details, please see the [additional information](https://blog.mattjustice.com/2020/11/24/gprof-profiler/).

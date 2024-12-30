@@ -47,12 +47,11 @@ double *am_demodulate(double *input_signal, int input_length, int generate_stats
 
     /* Shifting the 2400hz signal down to 0hz to center the data package.*/
     fftw_complex *shifted = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
-    int size = 11025;
-    int offset = size - 2400;
-    for (int i = size - offset; i < 11025; i++)
+    int offset = 11025 - 2400;
+    for (int i = 2400; i < 11025; i++)
     {
-        shifted[i - (size - offset)][0] = out[i][0];
-        shifted[i - (size - offset)][1] = out[i][1];
+        shifted[i - 2400][0] = out[i][0];
+        shifted[i - 2400][1] = out[i][1];
     }
 
     for (int i = 0; i < 2400; i++)
