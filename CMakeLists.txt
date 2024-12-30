@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pg")
+set(CMAKE_C_DEBUG_FLAGS "${CMAKE_C_DEBUG_FLAGS} -Wall -Wextra -pg")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -o3")
 
 # Setting project name
 project(aptdemod)
