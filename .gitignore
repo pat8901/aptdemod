@@ -1,5 +1,7 @@
 .vscode
 /profile
+/build
+/unity
 /extra
 src-plot/.venv
 src-plot/__pycache__
