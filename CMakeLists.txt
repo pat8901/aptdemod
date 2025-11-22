@@ -10,15 +10,15 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Build flags
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_DEBUG_FLAGS} -g -O0 -Wall -Wextra -fsanitize=address -fsanitize=undefined -pg")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_DEBUG_FLAGS} -g -O0 -Wall -Werror -Wextra -fsanitize=address -fsanitize=undefined -pg")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS} -O3 -s")
 
 # Find/build libraries
 find_library(SNDFILE sndfile REQUIRED)
 find_library(FFTW fftw3 REQUIRED)
 message(STATUS "Building Unity.")
-add_library(Unity STATIC unity/unity.c)
-target_include_directories(Unity PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/unity)
+add_library(Unity STATIC lib/Unity-2.6.1/src/unity.c)
+target_include_directories(Unity PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/lib/Unity-2.6.1/src)
 
 # Error check find/build libraries
 if(SNDFILE)

@@ -76,7 +76,7 @@ typedef struct Line
 
 // Main image creation functions
 int create_image(int width);
-int create_image_reverse(OptionFlags *ptr_flags, const char *audio_path[], char *output_path, int width);
+int create_image_reverse(OptionFlags *ptr_flags, const char *audio_path, char *output_path, int width);
 void create_test_image(double *buffer, int width, int height);
 void create_color_test_image();
 

@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 
     OptionFlags flags = {.file_flag = false, .verbose_flag = false, .generate_flag = false};
     OptionFlags *ptr_flags = &flags;
-    const char *audio_path[256];
+    char audio_path[256];
     int opt;
 
     static struct option const long_options[] =

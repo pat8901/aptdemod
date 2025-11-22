@@ -1,5 +1,6 @@
 #include <fftw3.h>
 #include "unity.h"
+#include <stdlib.h>
 #include "demod.h"
 
 void setUp()

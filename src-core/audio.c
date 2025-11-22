@@ -38,7 +38,7 @@ int down_sample(SNDFILE *sndfile, SF_INFO *sfinfo)
     sf_count_t frames = sfinfo->frames;
     sf_count_t count = 0;
     sf_count_t high_frames_amount = 11025;
-    sf_count_t low_frame_amount = 4160;
+    /* sf_count_t low_frame_amount = 4160; */
     int sample_rate = sfinfo->samplerate;
     float seek_rate = (float)sample_rate / 4160.0;
     float *buffer_11025 = (float *)malloc(high_frames_amount * sizeof(float));
@@ -64,8 +64,8 @@ int down_sample(SNDFILE *sndfile, SF_INFO *sfinfo)
     {
         /* Seek to the requested 11025hz frame and
            read a selected amount of samples into a frame buffer */
-        printf("count: %d\n", count);
-        sf_count_t start_frame = sf_seek(sndfile, count, SEEK_SET);
+        printf("count: %ld\n", count);
+        sf_seek(sndfile, count, SEEK_SET);
         sf_count_t frames_requested = sf_readf_float(sndfile, buffer_11025, high_frames_amount);
 
         /* Indicator that the last chunk is less than the required amount
@@ -73,7 +73,7 @@ int down_sample(SNDFILE *sndfile, SF_INFO *sfinfo)
            The program has neared the end of the audio file. */
         if (frames_requested != 11025)
         {
-            printf("Remaining chuck-size: %d\n", frames_requested);
+            printf("Remaining chuck-size: %ld\n", frames_requested);
         }
 
         /* Getting a dynamic length to create an 4160hz audio buffer.
@@ -103,7 +103,7 @@ int down_sample(SNDFILE *sndfile, SF_INFO *sfinfo)
 
         /* Write 4160hz buffer to output file. */
         sf_count_t frames_written = sf_writef_float(sndfile_4160, buffer_4160, downsample_length);
-        printf("Frames written %d\n", frames_written);
+        printf("Frames written %ld\n", frames_written);
         count = count + frames_requested;
         free(buffer_4160);
     }
@@ -111,7 +111,7 @@ int down_sample(SNDFILE *sndfile, SF_INFO *sfinfo)
     /* Displaying down-sampling stats. */
     printf("=================\n");
     printf("Finished!\n");
-    printf("Count: %d\n", count);
+    printf("Count: %ld\n", count);
 
     /* Clean up. */
     free(buffer_11025);
@@ -146,7 +146,7 @@ int create_audio_single(double *buffer)
 
     /* Displaying stats. */
     printf("=================\n");
-    printf("Frames written %d\n", frames_written);
+    printf("Frames written %ld\n", frames_written);
     printf("Finished!\n");
 
     /* Clean up. */
@@ -199,8 +199,8 @@ int create_audio()
     {
         /* Seek to the requested 11025hz frame and
            read a selected amount of samples into a frame buffer. */
-        printf("count: %d\n", count);
-        sf_count_t start_frame = sf_seek(sndfile_input, count, SEEK_SET);
+        printf("count: %ld\n", count);
+        sf_seek(sndfile_input, count, SEEK_SET);
         double *input_buffer = (double *)fftw_malloc(sizeof(double) * 11025);
         sf_count_t frames_requested = sf_readf_double(sndfile_input, input_buffer, 11025);
         printf("Frames read: %ld\n", frames_requested);
@@ -225,7 +225,7 @@ int create_audio()
         /* Writing demodulated frame buffer to audio output file. */
         sf_count_t frames_written = sf_writef_double(sndfile_output, intermediate_buffer, buffer_length);
         count += frames_requested;
-        printf("Frames written %d\n", frames_written);
+        printf("Frames written %ld\n", frames_written);
 
         /* Clean up. */
         free(input_buffer);
@@ -256,7 +256,7 @@ double *get_4160_sample()
     // TODO: How big should I make each index?
     double *mem_ptr = (double *)fftw_malloc(sizeof(double) * 4160);
 
-    sf_count_t start_frame = sf_seek(file, 4160 * 10, SEEK_SET);
+    sf_seek(file, 4160 * 10, SEEK_SET);
     sf_count_t frames_requested = sf_readf_double(file, mem_ptr, 4160);
     printf("Frames read: %ld\n", frames_requested);
 
@@ -275,7 +275,7 @@ double *get_11025_sample()
 
     double *mem_ptr = (double *)fftw_malloc(sizeof(double) * 11025);
 
-    sf_count_t start_frame = sf_seek(file, 0, SEEK_SET);
+    sf_seek(file, 0, SEEK_SET);
     sf_count_t frames_requested = sf_readf_double(file, mem_ptr, 11025);
     printf("Frames read: %ld\n", frames_requested);
 

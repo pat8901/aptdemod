@@ -128,7 +128,7 @@ int create_image(int width)
    This is necessary for bmp files. Can only handle 11025Hz audio files.
 
    int width - The amount of pixels for the output image*/
-int create_image_reverse(OptionFlags *ptr_flags, const char *audio_path[], char *output_path, int width)
+int create_image_reverse(OptionFlags *ptr_flags, const char *audio_path, char *output_path, int width)
 {
     /* Analyze option flags to set options for program execution. */
     if (ptr_flags->generate_flag == true)

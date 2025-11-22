@@ -26,7 +26,12 @@
 
 /* Amplitude demodulates a finite length frame buffer holding a 11025hz analog signal. */
 double *am_demodulate(double *input_signal, int input_length, int generate_stats)
-{
+{   
+
+    if(input_length == 11025){
+
+    }
+
     /* Initializing input and output buffers. */
     fftw_complex *buffer = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
     fftw_complex *out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
@@ -188,6 +193,10 @@ void passband_filter(fftw_complex *signal, int from, int to)
    buffer holding a 11025hz analog signal.*/
 fftw_complex *am_demod_single_11025(double *input_signal, int input_length, int generate_stats)
 {
+    if(input_length == 11025){
+        
+    }
+
     /* Initializing input and output buffers. */
     fftw_complex *buffer = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
     fftw_complex *out = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * 11025);
@@ -261,12 +270,5 @@ fftw_complex *am_demod_single_11025(double *input_signal, int input_length, int 
 
 /* TBD: Amplitude demodulates an APT signal in real time. */
 void finite_impulse_response()
-{
-}
-
-/* TBD: May use this function in demodulation process to containerize work.
-https://www.fftw.org/fftw3_doc/Complex-One_002dDimensional-DFTs.html
-https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm */
-void fast_fourier_transform(double *input_signal, int input_length)
 {
 }
