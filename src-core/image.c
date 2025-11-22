@@ -92,7 +92,7 @@ int create_image(int width)
         /* Seek to the requested 11025hz frame and
            read a selected amount of samples into a frame buffer. */
         printf("\rcount: %ld\n", count);
-        sf_count_t start_frame = sf_seek(sndfile_input, count, SEEK_SET);
+        sf_seek(sndfile_input, count, SEEK_SET);
         double *input_buffer = (double *)fftw_malloc(sizeof(double) * 11025);
         sf_count_t frames_requested = sf_readf_double(sndfile_input, input_buffer, 11025);
         printf("\rFrames read: %ld", frames_requested);
@@ -199,7 +199,7 @@ int create_image_reverse(OptionFlags *ptr_flags, const char *audio_path, char *o
         /* Seek to the requested 11025hz frame and
            read a selected amount of samples into a frame buffer. */
         frames -= 11025;
-        sf_count_t start_frame = sf_seek(sndfile_input, frames, SEEK_SET);
+        sf_seek(sndfile_input, frames, SEEK_SET);
         double *input_buffer = (double *)fftw_malloc(sizeof(double) * 11025);
         sf_count_t frames_requested = sf_readf_double(sndfile_input, input_buffer, 11025);
         printf("frames remaining=%ld  Frames read=%ld\n", frames, frames_requested);
@@ -227,7 +227,7 @@ int create_image_reverse(OptionFlags *ptr_flags, const char *audio_path, char *o
     {
         /* Seek to the requested 11025hz frame and
            read a selected amount of samples into a frame buffer. */
-        sf_count_t start_frame = sf_seek(sndfile_input, 0, SEEK_SET);
+        sf_seek(sndfile_input, 0, SEEK_SET);
         double *input_buffer = (double *)fftw_malloc(sizeof(double) * 11025);
         sf_count_t frames_requested = sf_readf_double(sndfile_input, input_buffer, frames);
         printf("Frames read: %ld\n", frames_requested);
